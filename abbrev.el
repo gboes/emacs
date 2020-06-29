@@ -11,6 +11,8 @@
 
 (define-abbrev-table 'TeX-special-mode-abbrev-table '())
 
+(define-abbrev-table 'array-mode-abbrev-table '())
+
 (define-abbrev-table 'biblio-selection-mode-abbrev-table '())
 
 (define-abbrev-table 'bibtex-mode-abbrev-table '())
@@ -27,6 +29,24 @@
 
 (define-abbrev-table 'completion-list-mode-abbrev-table '())
 
+(define-abbrev-table 'conf-colon-mode-abbrev-table '())
+
+(define-abbrev-table 'conf-desktop-mode-abbrev-table '())
+
+(define-abbrev-table 'conf-javaprop-mode-abbrev-table '())
+
+(define-abbrev-table 'conf-ppd-mode-abbrev-table '())
+
+(define-abbrev-table 'conf-space-mode-abbrev-table '())
+
+(define-abbrev-table 'conf-toml-mode-abbrev-table '())
+
+(define-abbrev-table 'conf-unix-mode-abbrev-table '())
+
+(define-abbrev-table 'conf-windows-mode-abbrev-table '())
+
+(define-abbrev-table 'conf-xdefaults-mode-abbrev-table '())
+
 (define-abbrev-table 'debugger-mode-abbrev-table '())
 
 (define-abbrev-table 'diff-mode-abbrev-table '())
@@ -35,9 +55,15 @@
 
 (define-abbrev-table 'doctex-mode-abbrev-table '())
 
+(define-abbrev-table 'doom-sandbox-emacs-lisp-mode-abbrev-table '())
+
+(define-abbrev-table 'edebug-eval-mode-abbrev-table '())
+
 (define-abbrev-table 'edit-abbrevs-mode-abbrev-table '())
 
 (define-abbrev-table 'elisp-byte-code-mode-abbrev-table '())
+
+(define-abbrev-table 'elisp-refs-mode-abbrev-table '())
 
 (define-abbrev-table 'emacs-lisp-mode-abbrev-table '())
 
@@ -57,13 +83,36 @@
 
 (define-abbrev-table 'git-commit-elisp-text-mode-abbrev-table '())
 
-(define-abbrev-table 'global-abbrev-table '())
+(define-abbrev-table 'gitignore-mode-abbrev-table '())
+
+(define-abbrev-table 'global-abbrev-table
+  '(
+    ("ALso" "Also" nil 1)
+    ("THat" "That" nil 3)
+    ("THe" "The" nil 4)
+    ("THis" "This" nil 1)
+    ("WHen" "When" nil 2)
+    ("htan" "than" nil 2)
+    ("hte" "the" nil 2)
+    ("hteir" "their" nil 2)
+    ("htis" "this" nil 1)
+    ("jsut" "just" nil 2)
+    ("otehr" "other" nil 1)
+    ("roamtbf" "This card will be filled when there are enough links pointing to it." nil 0)
+    ("teh" "the" nil 1)
+   ))
 
 (define-abbrev-table 'grep-mode-abbrev-table '())
 
+(define-abbrev-table 'helm-grep-mode-abbrev-table '())
+
 (define-abbrev-table 'helm-major-mode-abbrev-table '())
 
+(define-abbrev-table 'helm-occur-mode-abbrev-table '())
+
 (define-abbrev-table 'help-mode-abbrev-table '())
+
+(define-abbrev-table 'helpful-mode-abbrev-table '())
 
 (define-abbrev-table 'ibuffer-mode-abbrev-table '())
 
@@ -73,7 +122,8 @@
 
 (define-abbrev-table 'latex-mode-abbrev-table
   '(
-    ("THe" "The" nil 0)
+    ("THe" "The" nil 4)
+    ("THis" "This" nil 1)
    ))
 
 (define-abbrev-table 'lisp-mode-abbrev-table '())
@@ -126,6 +176,10 @@
 
 (define-abbrev-table 'org-export-stack-mode-abbrev-table '())
 
+(define-abbrev-table 'org-journal-mode-abbrev-table '())
+
+(define-abbrev-table 'org-journal-search-mode-abbrev-table '())
+
 (define-abbrev-table 'org-mode-abbrev-table '())
 
 (define-abbrev-table 'outline-mode-abbrev-table '())
@@ -147,6 +201,10 @@
 (define-abbrev-table 'reb-lisp-mode-abbrev-table '())
 
 (define-abbrev-table 'reb-mode-abbrev-table '())
+
+(define-abbrev-table 'reftex-select-bib-mode-abbrev-table '())
+
+(define-abbrev-table 'reftex-select-label-mode-abbrev-table '())
 
 (define-abbrev-table 'rxt-help-mode-abbrev-table '())
 

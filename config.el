@@ -21,7 +21,14 @@
 ;; font string. You generally only need these two:
 ;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
-(setq doom-font (font-spec :family "monospace" :size 15 ))
+    (cond ((eq system-type 'windows-nt)
+           ;; Windows-specific code goes here.
+           (setq doom-font (font-spec :family "monospace" :size 15 ))
+           )
+          ((eq system-type 'gnu/linux)
+           ;; Linux-specific code goes here.
+           (setq doom-font (font-spec :family "monospace" :size 25 ))
+           ))
 
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -95,29 +102,29 @@
   (toggle-frame-fullscreen))
                                         ;; Mode-Hooks
 (add-hook! 'latex-mode-hook #'visual-line-mode)
+(add-hook! 'latex-mode-hook #'rainbow-delimiters-mode-disable)
 (add-hook! 'latex-mode-hook #'flyspell-mode)
+(add-hook! 'text-mode-hook #'hl-todo-mode)
 (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
 (add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
 (add-hook! 'org-mode-hook (setq line-number-mode nil))
 ;; ;; (add-hook! 'org-mode-hook (setq org-todo-keywords  nil)) ; custom todo-kwords
 ;; (add-hook! 'latex-mode-hook (setq line-number-mode nil))
-(add-hook! 'latex-mode-hook (lambda() (rainbow-delimiters-mode -1)))
 ;; (add-hook! 'latex-mode-hook (setq-default left-margin-width 1))
 ;; (add-hook! 'latex-mode-hook (setq reftex-plug-into-AUCTeX t))
 ;; ;; (add-hook! 'latex-mode-hook #'(set-window-buffer nil (current-buffer))) ; maybe an error?
 ;; ;; (add-hook! 'text-mode-hook #'visual-line-mode #'hl-line-mode #'hl-todo-mode ) ;missing a "'" after the "#" before #'hl-todo-mode was a horrible bug to find
 ;; ;; (add-hook! 'hl-line-mode-hook #'(set-face-background 'solaire-hl-line-face "#ffebd4"))
-
-
+ 
 
 ;; ;; Visual adjustments
-;; (use-package!  beacon
-;;   ;; highlights the cursor when scrolling
-;;   :diminish
-;;   ;; :config (setq beacon-color "#666600")
-;;   :hook
-;;   ((org-mode text-mode) . beacon-mode)
-;;   )
+(use-package!  beacon
+  ;; highlights the cursor when scrolling
+  :diminish
+  ;; :config (setq beacon-color "#666600")
+  :hook
+  ((latex-mode) . beacon-mode)
+  )
 ;; better visulization for parentheses
 (use-package! rainbow-delimiters
   :defer
@@ -146,7 +153,7 @@
     (transpose-lines 1)
     (forward-line -1)))
 
-    (defun duplicate-line-or-region (&optional n)
+(defun duplicate-line-or-region (&optional n)
       "Duplicate current line, or region if active.
     With argument N, make N copies.
     With negative N, comment out original line and use the absolute value."
@@ -169,28 +176,37 @@
             (forward-char pos)))))
 
 ;; (global-unset-key (kbd "<f11>"))
-(use-package! maxframe)
+;; (use-package! maxframe)
 
 ;; ;; global keybindings
 (map! "C-1"       #'comment-line ; quick comment toggle
-      "<C-right>" #'forward-word
-      "<C-left>"  #'backward-word
+      ;; "C-c r"     #'eval-region
       "C-z"       #'undo-tree-undo
       "C-S-z"     #'undo-tree-redo
-      "C-c r"     #'eval-region
       "C-S-d"     #'duplicate-line-or-region
+      "<C-S-SPC>" #'fixup-whitespace
+      ;; movement
+      "<C-right>" #'forward-word
+      "<C-left>"  #'backward-word
       "<M-up>"    #'move-line-up
       "<M-down>"  #'move-line-down
       "<M-right>" #'forward-sentence
       "<M-left>"  #'backward-sentence
+      ;; shrinking and expanding regions
+      "C-."       #'er/expand-region
+      "C-,"         (lambda () (interactive) (er/expand-region -1)) ; overwritten by later keyset
+      ;; window management
+      "C-x w"     #'+workspace/close-window-or-workspace
+      "C-x <SPC>" #'ivy-switch-buffer
+      "C-<"       #'ivy-switch-buffer
+      "C-x <C-SPC>" #'ivy-switch-buffer-other-window
       "<S-f11>"   #'toggle-frame-maximized
-      "<S-SPC>" #'fixup-whitespace
-      "C-." #'er/expand-region
-      ;; "C-," #'(lambda () (interactive) (er/expand-region -1))
       )
 
 ;; ;; Todo: Add code-folding shortcuts for AucTeX
 
+(use-package! zen-mode)
+(global-set-key (kbd "C-M-z") 'zen-mode)
 
 ;; ABBREV-Mode
 (use-package! abbrev
@@ -200,7 +216,8 @@
   ;; ((org-mode text-mode) . abbrev-mode)
   :config
   (setq abbrev-file-name (expand-file-name "abbrev.el" doom-private-dir))
-  (setq save-abbrevs 'silently))
+  (setq save-abbrevs 'silently)
+  (map! "C-x a a" #'edit-abbrevs))
 
 ;; ============
 ;; LATEX
@@ -211,12 +228,22 @@
   ;; (latex-mode . (delete-selection-mode latex-extra-mode))
   :init
   (map! "C-c j" #'latex/next-section
-       ;; "C-i" #'TeX-complete-symbol
-        "C-c k" #'latex/previous-section
         "C-c o" #'latex/hide-show
+       ;; "C-i" #'TeX-complete-symbol
+        "C-c i" #'helm-insert-latex-math
+        "C-c k" #'latex/previous-section
         "C-c C-o" #'latex/hide-show-all
         "C-c n" #'TeX-narrow-to-group
-        "C-c c" #'reftex-citation))
+        "C-c c" #'reftex-citation
+        "<C-mouse-1>" #'pdf-sync-forward-search ;somehow buggy
+        "C-c C-j" #'pdf-sync-forward-search
+        "C-c g" #'pdf-sync-forward-search
+        ;; "<C-mouse-1>" #'pdf-sync-forward-search ; add a keyboard alternative
+        ;; TODO: add scroll-other-window for C-Mousewheel
+        ;; Add utilities to swap paragraphs -- should this only be in latex mode?
+        "<M-S-up>" (lambda() (interactive) (transpose-paragraphs -1) (backward-paragraph))
+        "<M-S-down>" #'transpose-paragraphs
+  ))
 
 ;; set default window margin
 (setq-default left-margin-width 1)
@@ -252,19 +279,22 @@
 ;;;; org-roam
 
 (use-package! org-journal
-      :defer
+      :after org-roam
       :bind
-      ("C-c n j" . org-journal-new-entry)
+      ;; ("C-c n j" . org-journal-new-entry)
+      ;; ("C-c r j" . org-journal-new-entry)
       :custom
       (org-journal-dir (concat org_roam_dir "/journal/"))
       (org-journal-date-prefix "#+TITLE: ")
       (org-journal-file-format "%Y-%m-%d.org")
-      (org-journal-date-format "%A, %d %B %Y"))
+      (org-journal-date-format "%A, %d %B %Y")
+
+      )
 
 
-(after! org-journal
-    (setq org-journal-enable-agenda-integration t)
-    )
+;; (after! org-journal
+    ;; (setq org-journal-enable-agenda-integration t)
+    ;; )
 
 
 ;; (use-package! org-ref
@@ -292,6 +322,13 @@
            :head "#+TITLE: ${title}\n#+ROAM_KEY: %<%Y-%m-%d>_${slug}\n\n"
            :unnarrowed t)
           ))
+  :init
+  (map! "C-c r t" #'org-roam-buffer-toggle-display
+        "C-c r f" #'org-roam-find-file
+        "C-c r i" #'org-roam-insert
+        "C-c r c" #'org-roam-capture
+        "C-c r j"   #'org-journal-new-entry
+        )
   )
 
 
@@ -300,6 +337,7 @@
 
 
 (setq
+ org-ref-default-bibliography '("/mnt/d/gdrive/org/full_zotbib.bib")
  bibtex-completion-notes-path "/mnt/d/gdrive/org/roam/orbnotes/"
  bibtex-completion-bibliography "/mnt/d/gdrive/org/full_zotbib.bib"
  bibtex-completion-pdf-field "file"
@@ -320,6 +358,16 @@
   ":END:\n\n"
   )
  )
+
+
+(after! pdf-tools
+  :config
+  ;; more fine-grained zooming
+ (setq pdf-view-resize-factor 1.1)
+ ;; keyboard shortcuts
+ (define-key pdf-view-mode-map (kbd "h") 'pdf-annot-add-highlight-markup-annotation)
+ (define-key pdf-view-mode-map (kbd "t") 'pdf-annot-add-text-annotation)
+ (define-key pdf-view-mode-map (kbd "D") 'pdf-annot-delete))
 
 
 
@@ -368,8 +416,10 @@
 ;; - a switch for serif fonts in buffer (maybe with a hook for latex-buffers) see emacswiki ""faces-per-buffer""
 ;; - same emacs setup unter ubuntu
 ;; - flyckeck default dictionary, flycheck language-switch
+;; - load a separate file my-snippets.el for small functions that I use. E.g.
+;; my/downcase-previous-word,  my/capitalize-previous-word
 ;; Shortcut for fullscreen/fullframe toggle!
-;; Add deft?
+;; Add deft!
 
 ;; DEBUG
 ;; - TODO Add "IMPORTANT" keyword in text highlight

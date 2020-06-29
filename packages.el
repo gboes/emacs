@@ -60,5 +60,6 @@
 (package! org-journal)
 (package! latex-extra)
 (package! expand-region)
+(package! zen-mode)
 
 ;; (package! abbrev)
