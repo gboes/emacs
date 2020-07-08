@@ -100,7 +100,11 @@
 (if (eq initial-window-system 'x)       ; Start in fullscreen
     (toggle-frame-maximized)
   (toggle-frame-fullscreen))
-                                        ;; Mode-Hooks
+
+
+;;;;;; Mode-Hooks
+
+
 (add-hook! 'latex-mode-hook #'visual-line-mode)
 (add-hook! 'latex-mode-hook #'rainbow-delimiters-mode-disable)
 (add-hook! 'latex-mode-hook #'flyspell-mode)
@@ -108,6 +112,10 @@
 (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
 (add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
 (add-hook! 'org-mode-hook (setq line-number-mode nil))
+(add-hook! 'octave-mode-hook (lambda () (abbrev-mode 1) (auto-fill-mode 1)
+                               (if (eq window-system 'x)(font-lock-mode 1))))
+
+
 ;; ;; (add-hook! 'org-mode-hook (setq org-todo-keywords  nil)) ; custom todo-kwords
 ;; (add-hook! 'latex-mode-hook (setq line-number-mode nil))
 ;; (add-hook! 'latex-mode-hook (setq-default left-margin-width 1))
@@ -115,16 +123,21 @@
 ;; ;; (add-hook! 'latex-mode-hook #'(set-window-buffer nil (current-buffer))) ; maybe an error?
 ;; ;; (add-hook! 'text-mode-hook #'visual-line-mode #'hl-line-mode #'hl-todo-mode ) ;missing a "'" after the "#" before #'hl-todo-mode was a horrible bug to find
 ;; ;; (add-hook! 'hl-line-mode-hook #'(set-face-background 'solaire-hl-line-face "#ffebd4"))
- 
+
+;;;;;; File-type hooks
+(setq auto-mode-alist
+      (cons '("\\.m$" . octave-mode) auto-mode-alist))
+
 
 ;; ;; Visual adjustments
-(use-package!  beacon
-  ;; highlights the cursor when scrolling
-  :diminish
-  ;; :config (setq beacon-color "#666600")
-  :hook
-  ((latex-mode) . beacon-mode)
-  )
+;; (use-package!  beacon ; might be obsolete with nav-flash init
+;;   ;; highlights the cursor when scrolling
+;;   :diminish
+;;   ;; :config (setq beacon-color "#666600")
+;;   :hook
+;;   ((latex-mode) . beacon-mode)
+;;   )
+
 ;; better visulization for parentheses
 (use-package! rainbow-delimiters
   :defer
@@ -206,7 +219,7 @@
 ;; ;; Todo: Add code-folding shortcuts for AucTeX
 
 (use-package! zen-mode)
-(global-set-key (kbd "C-M-z") 'zen-mode)
+;; (global-set-key (kbd "C-M-z") 'zen-mode)
 
 ;; ABBREV-Mode
 (use-package! abbrev
