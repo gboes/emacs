@@ -27,8 +27,13 @@
            )
           ((eq system-type 'gnu/linux)
            ;; Linux-specific code goes here.
-           (setq doom-font (font-spec :family "monospace" :size 25 ))
-           ))
+             (setq doom-font (font-spec :family "monospace" :size 25 ))
+             (when (string-match "-[Mm]icrosoft"  operating-system-release)
+             ;; WSL specific code goes here
+               (setq doom-font (font-spec :family "monospace" :size 15 ))
+               )
+             )
+    )
 
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -72,7 +77,6 @@
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
-(print org-roam-directory)
 ;; - `load!' for loading external *.el files relative to this one
 ;; - `use-package' for configuring packages
 ;; - `after!' for running code after a package has loaded
@@ -94,7 +98,7 @@
 ;;;;; Small adjustments
 (delete-selection-mode 1)
 (display-time-mode 1)
-;; (setq-default flyspell-default-dictionary "en-uk")
+(setq-default flyspell-default-dictionary "en_GB")
 (setq reftex-default-bibliography '("/mnt/d/gdrive/org/full_zotbib.bib"))
 (setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
 (if (eq initial-window-system 'x)       ; Start in fullscreen
@@ -188,8 +192,14 @@
             (forward-line 1)
             (forward-char pos)))))
 
-;; (global-unset-key (kbd "<f11>"))
-;; (use-package! maxframe)
+(defun my/capitalize-previous-word ()
+  "Transform word before cursor to exactly one capital."
+  (interactive)
+  (backward-word)
+  (capitalize-word 1)
+    )
+
+
 
 ;; ;; global keybindings
 (map! "C-1"       #'comment-line ; quick comment toggle
@@ -198,6 +208,7 @@
       "C-S-z"     #'undo-tree-redo
       "C-S-d"     #'duplicate-line-or-region
       "<C-S-SPC>" #'fixup-whitespace
+      "M-C"     #'my/capitalize-previous-word
       ;; movement
       "<C-right>" #'forward-word
       "<C-left>"  #'backward-word
@@ -206,11 +217,11 @@
       "<M-right>" #'forward-sentence
       "<M-left>"  #'backward-sentence
       ;; shrinking and expanding regions
-      "C-."       #'er/expand-region
-      "C-,"         (lambda () (interactive) (er/expand-region -1)) ; overwritten by later keyset
+      "C-c ."       #'er/expand-region
+      "C-c ,"         (lambda () (interactive) (er/expand-region -1)) ; overwritten by later keyset
       ;; window management
       "C-x w"     #'+workspace/close-window-or-workspace
-      "C-x <SPC>" #'ivy-switch-buffer
+      "C-x <SPC>" #'other-window
       "C-<"       #'ivy-switch-buffer
       "C-x <C-SPC>" #'ivy-switch-buffer-other-window
       "<S-f11>"   #'toggle-frame-maximized
