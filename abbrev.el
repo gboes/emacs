@@ -3,15 +3,9 @@
 
 (define-abbrev-table 'Custom-mode-abbrev-table '())
 
-(define-abbrev-table 'Info-edit-mode-abbrev-table '())
-
-(define-abbrev-table 'TeX-error-overview-mode-abbrev-table '())
-
-(define-abbrev-table 'TeX-output-mode-abbrev-table '())
-
-(define-abbrev-table 'TeX-special-mode-abbrev-table '())
-
-(define-abbrev-table 'array-mode-abbrev-table '())
+(define-abbrev-table 'awk-mode-abbrev-table
+  '(
+   ))
 
 (define-abbrev-table 'biblio-selection-mode-abbrev-table '())
 
@@ -20,6 +14,14 @@
 (define-abbrev-table 'bookmark-bmenu-mode-abbrev-table '())
 
 (define-abbrev-table 'bookmark-edit-annotation-mode-abbrev-table '())
+
+(define-abbrev-table 'c++-mode-abbrev-table
+  '(
+   ))
+
+(define-abbrev-table 'c-mode-abbrev-table
+  '(
+   ))
 
 (define-abbrev-table 'calendar-mode-abbrev-table '())
 
@@ -53,17 +55,9 @@
 
 (define-abbrev-table 'display-time-world-mode-abbrev-table '())
 
-(define-abbrev-table 'doctex-mode-abbrev-table '())
-
-(define-abbrev-table 'doom-sandbox-emacs-lisp-mode-abbrev-table '())
-
-(define-abbrev-table 'edebug-eval-mode-abbrev-table '())
-
 (define-abbrev-table 'edit-abbrevs-mode-abbrev-table '())
 
 (define-abbrev-table 'elisp-byte-code-mode-abbrev-table '())
-
-(define-abbrev-table 'elisp-refs-mode-abbrev-table '())
 
 (define-abbrev-table 'emacs-lisp-mode-abbrev-table '())
 
@@ -77,53 +71,86 @@
 
 (define-abbrev-table 'flycheck-error-message-mode-abbrev-table '())
 
-(define-abbrev-table 'flymake-diagnostics-buffer-mode-abbrev-table '())
-
 (define-abbrev-table 'fundamental-mode-abbrev-table '())
 
 (define-abbrev-table 'git-commit-elisp-text-mode-abbrev-table '())
 
-(define-abbrev-table 'gitignore-mode-abbrev-table '())
-
 (define-abbrev-table 'global-abbrev-table
   '(
-    ("ALso" "Also" nil 1)
-    ("THat" "That" nil 3)
-    ("THe" "The" nil 4)
-    ("THis" "This" nil 1)
-    ("WHen" "When" nil 2)
-    ("htan" "than" nil 2)
-    ("hte" "the" nil 2)
-    ("hteir" "their" nil 2)
-    ("htis" "this" nil 1)
-    ("jsut" "just" nil 2)
-    ("otehr" "other" nil 1)
-    ("roamtbf" "This card will be filled when there are enough links pointing to it." nil 0)
-    ("teh" "the" nil 1)
+    ("8Alpha" "Α" nil 0)
+    ("8Beta" "Β" nil 0)
+    ("8Chi" "Χ" nil 0)
+    ("8Delta" "Δ" nil 0)
+    ("8Epsilon" "Ε" nil 0)
+    ("8Eta" "Η" nil 0)
+    ("8Gamma" "Γ" nil 0)
+    ("8Iota" "Ι" nil 0)
+    ("8Kappa" "Κ" nil 0)
+    ("8Lambda" "Λ" nil 0)
+    ("8Mu" "Μ" nil 0)
+    ("8Nu" "Ν" nil 0)
+    ("8Omega" "Ω" nil 0)
+    ("8Omicron" "Ο" nil 0)
+    ("8Phi" "Φ" nil 0)
+    ("8Pi" "Π" nil 0)
+    ("8Psi" "Ψ" nil 0)
+    ("8Rho" "Ρ" nil 0)
+    ("8Sigma" "Σ" nil 0)
+    ("8Tau" "Τ" nil 0)
+    ("8Theta" "Θ" nil 0)
+    ("8Upsilon" "Υ" nil 0)
+    ("8Xi" "Ξ" nil 0)
+    ("8Zeta" "Ζ" nil 0)
+    ("8alpha" "α" nil 0)
+    ("8beta" "β" nil 0)
+    ("8cdot" "·" nil 1)
+    ("8chi" "χ" nil 0)
+    ("8delta" "δ" nil 0)
+    ("8dots" "…" nil 1)
+    ("8epsilon" "ε" nil 0)
+    ("8eta" "η" nil 0)
+    ("8gamma" "γ" nil 0)
+    ("8grequal" "≥" nil 0)
+    ("8iota" "ι" nil 0)
+    ("8kappa" "κ" nil 0)
+    ("8lambda" "λ" nil 0)
+    ("8lequal" "≤" nil 0)
+    ("8mu" "μ" nil 0)
+    ("8nequal" "≠" nil 0)
+    ("8nu" "ν" nil 0)
+    ("8omega" "ω" nil 0)
+    ("8omicron" "ο" nil 0)
+    ("8phi" "φ" nil 0)
+    ("8pi" "π" nil 0)
+    ("8psi" "ψ" nil 0)
+    ("8rho" "ρ" nil 0)
+    ("8sigma" "σ" nil 0)
+    ("8tau" "τ" nil 0)
+    ("8theta" "θ" nil 6)
+    ("8unequal" "≠" nil 1)
+    ("8upsilon" "υ" nil 0)
+    ("8varsigma" "ς" nil 0)
+    ("8xi" "ξ" nil 0)
+    ("8zeta" "ζ" nil 0)
+    ("THe" "The" nil 3)
    ))
 
 (define-abbrev-table 'grep-mode-abbrev-table '())
 
-(define-abbrev-table 'helm-grep-mode-abbrev-table '())
-
 (define-abbrev-table 'helm-major-mode-abbrev-table '())
-
-(define-abbrev-table 'helm-occur-mode-abbrev-table '())
 
 (define-abbrev-table 'help-mode-abbrev-table '())
 
-(define-abbrev-table 'helpful-mode-abbrev-table '())
-
 (define-abbrev-table 'ibuffer-mode-abbrev-table '())
+
+(define-abbrev-table 'idl-mode-abbrev-table '())
 
 (define-abbrev-table 'ivy-occur-grep-mode-abbrev-table '())
 
 (define-abbrev-table 'ivy-occur-mode-abbrev-table '())
 
-(define-abbrev-table 'latex-mode-abbrev-table
+(define-abbrev-table 'java-mode-abbrev-table
   '(
-    ("THe" "The" nil 4)
-    ("THis" "This" nil 1)
    ))
 
 (define-abbrev-table 'lisp-mode-abbrev-table '())
@@ -170,9 +197,15 @@
 
 (define-abbrev-table 'messages-buffer-mode-abbrev-table '())
 
+(define-abbrev-table 'objc-mode-abbrev-table
+  '(
+   ))
+
 (define-abbrev-table 'occur-edit-mode-abbrev-table '())
 
 (define-abbrev-table 'occur-mode-abbrev-table '())
+
+(define-abbrev-table 'octave-abbrev-table '())
 
 (define-abbrev-table 'org-export-stack-mode-abbrev-table '())
 
@@ -190,9 +223,9 @@
 
 (define-abbrev-table 'pdf-occur-buffer-mode-abbrev-table '())
 
-(define-abbrev-table 'pdf-outline-buffer-mode-abbrev-table '())
-
-(define-abbrev-table 'plain-tex-mode-abbrev-table '())
+(define-abbrev-table 'pike-mode-abbrev-table
+  '(
+   ))
 
 (define-abbrev-table 'process-menu-mode-abbrev-table '())
 
@@ -202,17 +235,11 @@
 
 (define-abbrev-table 'reb-mode-abbrev-table '())
 
-(define-abbrev-table 'reftex-select-bib-mode-abbrev-table '())
-
-(define-abbrev-table 'reftex-select-label-mode-abbrev-table '())
-
 (define-abbrev-table 'rxt-help-mode-abbrev-table '())
 
 (define-abbrev-table 'select-tags-table-mode-abbrev-table '())
 
 (define-abbrev-table 'shell-mode-abbrev-table '())
-
-(define-abbrev-table 'slitex-mode-abbrev-table '())
 
 (define-abbrev-table 'snippet-mode-abbrev-table '())
 
@@ -223,10 +250,6 @@
 (define-abbrev-table 'tablist-mode-abbrev-table '())
 
 (define-abbrev-table 'tabulated-list-mode-abbrev-table '())
-
-(define-abbrev-table 'tex-mode-abbrev-table '())
-
-(define-abbrev-table 'tex-shell-abbrev-table '())
 
 (define-abbrev-table 'text-mode-abbrev-table '())
 
@@ -251,4 +274,6 @@
 (define-abbrev-table 'vc-svn-log-view-mode-abbrev-table '())
 
 (define-abbrev-table 'xref--xref-buffer-mode-abbrev-table '())
+
+(define-abbrev-table 'zen-mode-abbrev-table '())
 
