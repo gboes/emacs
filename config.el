@@ -116,6 +116,7 @@
 (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
 (add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
 (add-hook! 'org-mode-hook (setq line-number-mode nil))
+(add-hook! 'org-mode-hook #'org-roam-buffer-deactivate)
 (add-hook! 'octave-mode-hook (lambda () (abbrev-mode 1) (auto-fill-mode 1)
                                (if (eq window-system 'x)(font-lock-mode 1))))
 
@@ -199,7 +200,12 @@
   (capitalize-word 1)
     )
 
-
+(defun my/kill-other-buffer ()
+  "Kills the buffer in the opposite window."
+  (interactive)
+  (other-window 1)
+  (kill-this-buffer)
+  (other-window 1))
 
 ;; ;; global keybindings
 (map! "C-1"       #'comment-line ; quick comment toggle
@@ -220,9 +226,13 @@
       "C-c ."       #'er/expand-region
       "C-c ,"         (lambda () (interactive) (er/expand-region -1)) ; overwritten by later keyset
       ;; window management
-      "C-x w"     #'+workspace/close-window-or-workspace
+      "C-x w"     #'kill-this-buffer
+      "C-x W"     #'my/kill-other-buffer
       "C-x <SPC>" #'other-window
-      "C-<"       #'ivy-switch-buffer
+      "C-<"       #'previous-buffer
+      "C-<tab>"       #'previous-buffer
+      "C->"       #'next-buffer
+      "<C-S-iso-lefttab>"       #'next-buffer
       "C-x <C-SPC>" #'ivy-switch-buffer-other-window
       "<S-f11>"   #'toggle-frame-maximized
       )
@@ -246,7 +256,32 @@
 ;; ============
 ;; LATEX
 ;; ============
-(use-package! latex-extra               ; Allows for Code folding
+(defun my/latex-word-count ()
+  "Runs texcount on the current file. "
+  (interactive)
+  (display-message-or-buffer
+   (shell-command-to-string (concat "texcount "
+                       ; " optional arguments "
+                         "-inc "
+                         ;; "-total "
+                         ;; "-brief "
+                         "-0 " ; only a total number as output
+                         (buffer-file-name)
+                         ))))
+(defun my/latex-word-count-verbose ()
+  "Runs texcount on the current file. "
+  (interactive)
+  (display-message-or-buffer
+   (shell-command-to-string (concat "texcount "
+                       ; " optional arguments "
+                         "-inc "
+                         ;; "-total "
+                         ;; "-brief "
+                         (shell-quote-argument buffer-file-name)
+                         ))))
+
+
+(use-package! latex-extra               ; Allows for Code folding, and other utilities
   :after latex
   ;; :hook
   ;; (latex-mode . (delete-selection-mode latex-extra-mode))
@@ -267,22 +302,21 @@
         ;; Add utilities to swap paragraphs -- should this only be in latex mode?
         "<M-S-up>" (lambda() (interactive) (transpose-paragraphs -1) (backward-paragraph))
         "<M-S-down>" #'transpose-paragraphs
+        "C-c w" #'my/latex-word-count
   ))
+
 
 ;; set default window margin
 (setq-default left-margin-width 1)
 (set-window-buffer nil (current-buffer))
 
-;; Consider adding an autocompile upon Save
+;;  autocompile upon Save? Maybe relying on latexmk would be a is a better idea
 ;; (add-hook 'after-save-hook
 ;; 	  (lambda ()
 ;; 	    (when (string= major-mode 'latex-mode)
-;;         (flyspell-buffer)
-;; 	      ;; (TeX-run-latexmk
-;; 	      ;;  "LaTeX"
-;; 	      ;;  (format "latexmk -xelatex %s" (buffer-file-name)) ; would need to amended for right latex command
-;; 	      ;;                    (file-name-base (buffer-file-name)))
+;; (TeX-command-buffer "LaTeX")
 ;;         )))
+
 
 (defun flyspell-save-word ()
   (interactive)
