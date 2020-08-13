@@ -24,13 +24,25 @@
     (cond ((eq system-type 'windows-nt)
            ;; Windows-specific code goes here.
            (setq doom-font (font-spec :family "monospace" :size 15 ))
+           (setq org-directory "/mnt/d/Dropbox/org/"
+                 org_roam_dir (concat org-directory "roam")
+                 org-roam-directory org_roam_dir
+                 )
            )
           ((eq system-type 'gnu/linux)
            ;; Linux-specific code goes here.
-             (setq doom-font (font-spec :family "monospace" :size 25 ))
+           (setq doom-font (font-spec :family "monospace" :size 25 ))
+           (setq org-directory "/home/greg/sync/Dropbox/org/"
+                 org_roam_dir (concat org-directory "roam")
+                 org-roam-directory org_roam_dir
+                 )
              (when (string-match "-[Mm]icrosoft"  operating-system-release)
              ;; WSL specific code goes here
                (setq doom-font (font-spec :family "monospace" :size 15 ))
+               (setq org-directory "/mnt/d/Dropbox/org/"
+                     org_roam_dir (concat org-directory "roam")
+                     org-roam-directory org_roam_dir
+                     )
                )
              )
     )
@@ -53,7 +65,8 @@
 (set-face-background 'region "#ffeeb0")
 ; better visible cursor
 (set-face-background 'cursor "#11ccd6")
-(after! org-mode
+;; (after! org-mode
+(after! org
 	(set-face-foreground 'org-document-info-keyword "#a69d92")
   (set-face-foreground 'custom-comment-tag "#a69d92")) ;better readable preamble in org mode
 
@@ -66,14 +79,11 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "/mnt/d/gdrive/org/"
-      org_roam_dir (concat org-directory "roam")
-      org-roam-directory org_roam_dir
-      )
+
+
  ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
-
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
@@ -95,28 +105,38 @@
 
 ;; PERSONAL CONFIG
 
-;;;;; Small adjustments
+;;;;; Small global adjustments
+(setq delete-by-moving-to-trash t)      ; Use system recycle bin
 (delete-selection-mode 1)
 (display-time-mode 1)
-(setq-default flyspell-default-dictionary "en_GB")
-(setq reftex-default-bibliography '("/mnt/d/gdrive/org/full_zotbib.bib"))
+(setq display-time-24hr-format t)
+(setq-default left-margin-width 1)
+(set-window-buffer nil (current-buffer))
+;; (global-subword-mode 1) ; word boundaries in CamelCased Words
+(setq-default flyspell-default-dictionary "en_GB-ize-w_accents")
+;-ize endings with British English as default dictionary. 
+(setq-default ispell-dictionary "en_GB-ize-w_accents")
+(setq reftex-default-bibliography '("/mnt/d/Dropbox/org/full_zotbib.bib"))
 (setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
 (if (eq initial-window-system 'x)       ; Start in fullscreen
     (toggle-frame-maximized)
   (toggle-frame-fullscreen))
+;; newchange:
+;; (setq org-M-RET-may-split-line '(("default" . 1)
+;;                                  ("headline" . 1))) ;this is supposed to work?
 
+;; Use a bash shell -- conflicts with my/latex-word-count, enables pomodoro utility
+;; (setq shell-file-name "bash")
+;; ;; initialize bash aliases
+;; (setq shell-command-switch "-i") -i: interactive;
+;; -c: read the commands that follow -l: read .bashrc
 
 ;;;;;; Mode-Hooks
-
-
-(add-hook! 'latex-mode-hook #'visual-line-mode)
-(add-hook! 'latex-mode-hook #'rainbow-delimiters-mode-disable)
-(add-hook! 'latex-mode-hook #'flyspell-mode)
 (add-hook! 'text-mode-hook #'hl-todo-mode)
 (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
 (add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
-(add-hook! 'org-mode-hook (setq line-number-mode nil))
-(add-hook! 'org-mode-hook #'org-roam-buffer-deactivate)
+;; (add-hook! 'org-mode-hook (setq line-number-mode nil))
+;; (add-hook 'org-mode-hook (setq line-number-mode nil))
 (add-hook! 'octave-mode-hook (lambda () (abbrev-mode 1) (auto-fill-mode 1)
                                (if (eq window-system 'x)(font-lock-mode 1))))
 
@@ -134,21 +154,19 @@
       (cons '("\\.m$" . octave-mode) auto-mode-alist))
 
 
-;; ;; Visual adjustments
-;; (use-package!  beacon ; might be obsolete with nav-flash init
-;;   ;; highlights the cursor when scrolling
-;;   :diminish
-;;   ;; :config (setq beacon-color "#666600")
-;;   :hook
-;;   ((latex-mode) . beacon-mode)
-;;   )
-
 ;; better visulization for parentheses
 (use-package! rainbow-delimiters
-  :defer
-  :init
-  (setq-default rainbow-delimiters-mode)
-  (setq-default electric-pair-mode))
+  ;; :defer
+  ;; :init
+  ;; (setq-default rainbow-delimiters-mode)
+  ;; (setq-default electric-pair-mode)
+  :hook
+  ((prog-mode . rainbow-delimiters-mode)
+   (prog-mode . electric-pair-mode))
+  :config
+  (add-hook 'latex-mode-hook (lambda () (rainbow-delimiters-mode -1)))
+         ;; (sh-mode . rainbow-delimiters-mode)
+        )
 
 ;; General keybindings
 (defmacro save-column (&rest body)
@@ -172,9 +190,9 @@
     (forward-line -1)))
 
 (defun duplicate-line-or-region (&optional n)
-      "Duplicate current line, or region if active.
-    With argument N, make N copies.
-    With negative N, comment out original line and use the absolute value."
+  "Duplicate current line, or region if active.
+  With argument N, make N copies.
+  With negative N, comment out original line and use the absolute value."
       (interactive "*p")
       (let ((use-region (use-region-p)))
         (save-excursion
@@ -194,11 +212,14 @@
             (forward-char pos)))))
 
 (defun my/capitalize-previous-word ()
-  "Transform word before cursor to exactly one capital."
+  "Transform word before cursor to exactly one capital.
+   Leaves exactly one space behind it."
   (interactive)
   (backward-word)
   (capitalize-word 1)
-    )
+  (if (= 32 (char-after)) ; check for whitespace
+      (forward-char)
+      ))
 
 (defun my/kill-other-buffer ()
   "Kills the buffer in the opposite window."
@@ -235,11 +256,18 @@
       "<C-S-iso-lefttab>"       #'next-buffer
       "C-x <C-SPC>" #'ivy-switch-buffer-other-window
       "<S-f11>"   #'toggle-frame-maximized
+      "C-x C-r" #'helm-recentf
       )
 
-;; ;; Todo: Add code-folding shortcuts for AucTeX
+;; TODO Rebind to local maps
+;; syntax example:
+;; (map! :map mu4e-main-mode-map
+;;       :after mu4e
+;;       :nive "h" #'+workspace/other)
 
-(use-package! zen-mode)
+
+
+;; (use-package! zen-mode)
 ;; (global-set-key (kbd "C-M-z") 'zen-mode)
 
 ;; ABBREV-Mode
@@ -253,23 +281,54 @@
   (setq save-abbrevs 'silently)
   (map! "C-x a a" #'edit-abbrevs))
 
+
+(defun my/expand-without-space ()
+    "Expand an abbrev without inserting <SPC> if <SPC> triggered expansion."
+;; Based on http://ergoemacs.org/emacs/emacs_abbrev_mode_tutorial.html
+;; t  ; This is the minimal version
+    (if (= ?\  last-input-event)
+    t          ;if last key was <SPC>
+  nil          ; otherwise
+  ))
+(put 'my/expand-without-space 'no-self-insert t)
+
 ;; ============
 ;; LATEX
 ;; ============
 (defun my/latex-word-count ()
-  "Runs texcount on the current file. "
+  "Run texcount on the current file."
   (interactive)
   (display-message-or-buffer
-   (shell-command-to-string (concat "texcount "
+   (concat "Total word count: "
+    (shell-command-to-string (concat "texcount "
                        ; " optional arguments "
                          "-inc "
+                         "-sum "
                          ;; "-total "
                          ;; "-brief "
                          "-0 " ; only a total number as output
+                         "'"
                          (buffer-file-name)
-                         ))))
+                         "'"
+                         )))))
+
+;; (defun my/pomodoro-session-start (task)
+;;   "Call the pomodoro utility in the background to log a work session."
+;;   (interactive "sFocus of the next 25 minutes: ")
+;;   (call-process-shell-command (concat "/mnt/d/gdrive/conf/bashutils/pomodoro_CLI.sh  " task "&")
+;;                               nil 0)
+;;   )
+
+
+;; (defun my/pomodoro-session-log (task)
+;;   "Log an elapsed work session without starting a timer."
+;;   (interactive "sFocus of the finished session: ")
+;;   (shell-command (concat "/mnt/d/gdrive/conf/bashutils/pomodoro_CLI.sh --log-only " task "&")
+;;   ))
+
+
 (defun my/latex-word-count-verbose ()
-  "Runs texcount on the current file. "
+  "Run texcount on the current file."
   (interactive)
   (display-message-or-buffer
    (shell-command-to-string (concat "texcount "
@@ -281,19 +340,44 @@
                          ))))
 
 
+(use-package! latex
+  ;; :hook
+;;     ('LaTeX-mode-hook TeX-fold-mode))
+  ;; (add-hook! 'latex-mode-hook (lambda () (TeX-fold-mode -1)))
+  ;; Use pdf-tools to open PDF files
+  :config
+(setq
+ TeX-view-program-selection '((output-pdf "PDF Tools"))
+ TeX-source-correlate-start-server t
+ )
+;; Update PDF buffers after successful LaTeX runs
+(add-hook 'TeX-after-compilation-finished-functions
+          #'TeX-revert-document-buffer)
+(add-hook! 'LaTeX-mode-hook #'visual-line-mode)
+(add-hook! 'LaTeX-mode-hook #'turn-off-auto-fill)
+(setq TeX-save-query nil)
+;; (add-hook 'LaTeX-mode-hook (lambda () (rainbow-delimiters-mode rainbow-delimiters-mode-disablede-hook (flyspell-lazy-mode)))
+;; (add-hook! 'LaTeX-mode-hook (lambda () (TeX-fold-mode -1)))
+  )
+
+
 (use-package! latex-extra               ; Allows for Code folding, and other utilities
   :after latex
   ;; :hook
   ;; (latex-mode . (delete-selection-mode latex-extra-mode))
-  :init
+  :hook (LaTeX-mode . latex-extra-mode)
+  :config
+  ;; (add-hook! 'latex-mode-hook #'latex-extra-mode)
   (map! "C-c j" #'latex/next-section
-        "C-c o" #'latex/hide-show
+        "C-c C-f" #'TeX-font
+        "C-c f" #'latex/next-section-same-level
        ;; "C-i" #'TeX-complete-symbol
         "C-c i" #'helm-insert-latex-math
         "C-c k" #'latex/previous-section
         "C-c C-o" #'latex/hide-show-all
         "C-c n" #'TeX-narrow-to-group
         "C-c c" #'reftex-citation
+        "C-c t" #'reftex-toc
         "<C-mouse-1>" #'pdf-sync-forward-search ;somehow buggy
         "C-c C-j" #'pdf-sync-forward-search
         "C-c g" #'pdf-sync-forward-search
@@ -303,27 +387,27 @@
         "<M-S-up>" (lambda() (interactive) (transpose-paragraphs -1) (backward-paragraph))
         "<M-S-down>" #'transpose-paragraphs
         "C-c w" #'my/latex-word-count
-  ))
+        )
+  )
 
+;; ==========
+;;  FLYSPELL
+;; ==========
 
-;; set default window margin
-(setq-default left-margin-width 1)
-(set-window-buffer nil (current-buffer))
-
-;;  autocompile upon Save? Maybe relying on latexmk would be a is a better idea
-;; (add-hook 'after-save-hook
-;; 	  (lambda ()
-;; 	    (when (string= major-mode 'latex-mode)
-;; (TeX-command-buffer "LaTeX")
-;;         )))
-
-
-(defun flyspell-save-word ()
+(defun my/flyspell-save-word ()
+  "Add a word to the personal dictionary."
+  :after 'flyspell
   (interactive)
   (let ((current-location (point))
          (word (flyspell-get-word)))
     (when (consp word)
       (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location))))
+
+(map!
+ :after flyspell
+        "<C-dead-circumflex>" #'flyspell-correct-word-before-point
+        "C-°" #'my/flyspell-save-word
+ )
 
 
 ;; ;; ========
@@ -341,6 +425,10 @@
       :bind
       ;; ("C-c n j" . org-journal-new-entry)
       ;; ("C-c r j" . org-journal-new-entry)
+      :init
+      (map!
+       "C-c r j" #'org-journal-new-entry
+       )
       :custom
       (org-journal-dir (concat org_roam_dir "/journal/"))
       (org-journal-date-prefix "#+TITLE: ")
@@ -380,12 +468,14 @@
            :head "#+TITLE: ${title}\n#+ROAM_KEY: %<%Y-%m-%d>_${slug}\n\n"
            :unnarrowed t)
           ))
+  (setq +org-roam-open-buffer-on-find-file nil) ; inhibit roam buffer
   :init
   (map! "C-c r t" #'org-roam-buffer-toggle-display
         "C-c r f" #'org-roam-find-file
         "C-c r i" #'org-roam-insert
         "C-c r c" #'org-roam-capture
-        "C-c r j"   #'org-journal-new-entry
+        "C-c r g" #'org-open-at-point
+        "C-c r r" #'org-roam-find-ref
         )
   )
 
@@ -395,9 +485,9 @@
 
 
 (setq
- org-ref-default-bibliography '("/mnt/d/gdrive/org/full_zotbib.bib")
- bibtex-completion-notes-path "/mnt/d/gdrive/org/roam/orbnotes/"
- bibtex-completion-bibliography "/mnt/d/gdrive/org/full_zotbib.bib"
+ org-ref-default-bibliography '("/mnt/d/Dropbox/org/full_zotbib.bib")
+ bibtex-completion-notes-path "/mnt/d/Dropbox/org/roam/orbnotes/"
+ bibtex-completion-bibliography "/mnt/d/Dropbox/org/full_zotbib.bib"
  bibtex-completion-pdf-field "file"
  bibtex-completion-notes-template-multiple-files
  (concat
@@ -467,23 +557,49 @@
 ;; ;;            :unnarrowed t)))
 ;;   )
 
+;; ====================
+;; PYTHON
+;; ====================
+
+;; set local key: C-c g to +lookup/definition
+
+;; ====================
+;; TRAMP Remote Editing
+;; ====================
+(setq tramp-default-method "sshx")       ;instead of scp. sshx has fewer auth prompts than ssh
+(defvar disable-tramp-backups '(all))   ;fewer requests without autosaves
+(setq tramp-verbose 10)
+;; Disable completion when remote-editing.
+(add-hook
+ 'python-mode-hook
+ (lambda () (when (file-remote-p default-directory)
+              (company-mode -1)
+              (projectile-mode -1)
+              (turn-off-anaconda-eldoc-mode)
+              (anaconda-mode -1))))
+(add-hook
+ 'python-mode-hook
+ (lambda () (when (file-remote-p default-directory)
+              (company-mode -1)
+              (projectile-mode -1)
+              (turn-off-anaconda-eldoc-mode)
+              (anaconda-mode -1))))
+
+
 
 ;; ;; TODO
 ;; ADD
 ;; - writeroom-mode-support
 ;; - a switch for serif fonts in buffer (maybe with a hook for latex-buffers) see emacswiki ""faces-per-buffer""
-;; - same emacs setup unter ubuntu
-;; - flyckeck default dictionary, flycheck language-switch
-;; - load a separate file my-snippets.el for small functions that I use. E.g.
-;; my/downcase-previous-word,  my/capitalize-previous-word
+;; - flycheck default dictionary, flycheck language-switch
+;; - load a separate file my-snippets.el for the defun my/* functions that I use
+;; - use proper hook! macros for doom config!
 ;; Shortcut for fullscreen/fullframe toggle!
 ;; Add deft!
 
 ;; DEBUG
 ;; - TODO Add "IMPORTANT" keyword in text highlight
-;; - Clipboard support with X-server
 ;; - Emacs-client + daemon setup
-;; - doom sync for latex addins
 ;; - better scrolling
 ;; - change background colour / adaptive background colour
 

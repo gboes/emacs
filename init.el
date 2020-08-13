@@ -42,7 +42,8 @@
        ophints           ; highlight the region an operation acts on
        (popup +defaults)   ; tame sudden yet inevitable temporary windows
        ;;pretty-code       ; ligatures or substitute text with pretty symbols
-       ;;tabs              ; an tab bar for Emacs
+       ;; tabs              ; an tab bar for Emacs
+       ;; (tabs +centaur-tabs)              ; an tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
@@ -134,7 +135,7 @@
        ;;javascript        ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
-       (latex +fold +auctex-latexmk +adaptive-wrap +company-auctex +company-reftex)             ; writing papers in Emacs has never been so fun
+       (latex +auctex-latexmk +adaptive-wrap +company-auctex +company-reftex)             ; writing papers in Emacs has never been so fun
        ;;lean
        ;;factor
        ;;ledger            ; an accounting system in Emacs
@@ -143,7 +144,7 @@
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-       (org +roam +journal +dragndrop) ; interesting föags to add:pomodoro, pandoc, noter,
+       (org +roam +journal +dragndrop) ; interesting flags to add:pomodoro, pandoc, noter,
                            ; organize your plain life in plain text
        ;;perl              ; write code no one else can comprehend
        ;;php               ; perl's insecure younger brother
