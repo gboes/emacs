@@ -35,6 +35,7 @@
            (setq org-directory "/home/greg/sync/Dropbox/org/"
                  org_roam_dir (concat org-directory "roam")
                  org-roam-directory org_roam_dir
+                 org-roam-db-location "/home/greg/org-roam.db"
                  )
              (when (string-match "-[Mm]icrosoft"  operating-system-release)
              ;; WSL specific code goes here
@@ -42,10 +43,8 @@
                (setq org-directory "/mnt/d/Dropbox/org/"
                      org_roam_dir (concat org-directory "roam")
                      org-roam-directory org_roam_dir
-                     )
-               )
-             )
-    )
+                     org-roam-db-location "/mnt/d/Temporary-Data/org-roam.db"
+                     ))))
 
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -132,7 +131,20 @@
 ;; -c: read the commands that follow -l: read .bashrc
 
 ;;;;;; Mode-Hooks
+
 (add-hook! 'text-mode-hook #'hl-todo-mode)
+(setq hl-todo-highlight-punctuation ":"
+      hl-todo-keyword-faces
+          `(("TODO"       warning bold)
+            ("FIXME"      error bold)
+            ("DEBUG"      error bold)
+            ("IMPORTANT"      error bold italic)
+            ("HACK"       font-lock-constant-face bold)
+            ("REVIEW"     font-lock-keyword-face bold)
+            ("NOTE"       success bold)
+            ("DEPRECATED" font-lock-doc-face bold)
+            ))
+
 (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
 (add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
 ;; (add-hook! 'org-mode-hook (setq line-number-mode nil))
@@ -162,7 +174,9 @@
   ;; (setq-default electric-pair-mode)
   :hook
   ((prog-mode . rainbow-delimiters-mode)
-   (prog-mode . electric-pair-mode))
+   ;; (prog-mode . electric-pair-mode)
+   (prog-mode . smartparens-mode)
+   )
   :config
   (add-hook 'latex-mode-hook (lambda () (rainbow-delimiters-mode -1)))
          ;; (sh-mode . rainbow-delimiters-mode)
@@ -228,6 +242,8 @@
   (kill-this-buffer)
   (other-window 1))
 
+
+(load! "move-text.el")
 ;; ;; global keybindings
 (map! "C-1"       #'comment-line ; quick comment toggle
       ;; "C-c r"     #'eval-region
@@ -239,8 +255,10 @@
       ;; movement
       "<C-right>" #'forward-word
       "<C-left>"  #'backward-word
-      "<M-up>"    #'move-line-up
-      "<M-down>"  #'move-line-down
+      "<C-up>"    #'move-text-up
+      "<M-up>"    #'move-text-up
+      "<C-down>"  #'move-text-down
+      "<M-down>"  #'move-text-down
       "<M-right>" #'forward-sentence
       "<M-left>"  #'backward-sentence
       ;; shrinking and expanding regions
@@ -291,6 +309,7 @@
   nil          ; otherwise
   ))
 (put 'my/expand-without-space 'no-self-insert t)
+
 
 ;; ============
 ;; LATEX
@@ -414,6 +433,22 @@
 ;; ;; ORG MODE
 ;; ;; ========
 
+;; Use variable width font faces in current buffer
+ ;; (defun my/buffer-face-proportional-spaced ()
+ ;;   "Set font to a variable width (proportional) fonts in current buffer"
+ ;;   (interactive)
+ ;;   (setq buffer-face-mode-face '(:family "Symbola" :height 100 :width semi-condensed))
+ ;;   (buffer-face-mode))
+
+ ;; ;; Use monospaced font faces in current buffer
+ ;; (defun my/buffer-face-mono-spaced ()
+ ;;   "Sets a fixed width (monospace) font in current buffer"
+ ;;   (interactive)
+ ;;   (setq buffer-face-mode-face '(:family "Inconsolata" :height 100))
+ ;;   (buffer-face-mode))
+
+
+
 (use-package! org-pdftools
   :hook (org-load . org-pdftools-setup-link))
 
@@ -434,7 +469,10 @@
       (org-journal-date-prefix "#+TITLE: ")
       (org-journal-file-format "%Y-%m-%d.org")
       (org-journal-date-format "%A, %d %B %Y")
-
+      ;; System locale to use for formatting time values.
+      (setq system-time-locale "C")         ; Make sure that the weekdays in the
+                                      ; time stamps of your Org mode files and
+                                      ; in the agenda appear in English.
       )
 
 
@@ -562,6 +600,11 @@
 ;; ====================
 
 ;; set local key: C-c g to +lookup/definition
+(map! :map python-mode-map
+      "C-c g"    #'+lookup/definition
+      "<C-up>"   #'move-line-up
+      "<C-down>" #'move-line-down
+      )
 
 ;; ====================
 ;; TRAMP Remote Editing
@@ -577,31 +620,21 @@
               (projectile-mode -1)
               (turn-off-anaconda-eldoc-mode)
               (anaconda-mode -1))))
-(add-hook
- 'python-mode-hook
- (lambda () (when (file-remote-p default-directory)
-              (company-mode -1)
-              (projectile-mode -1)
-              (turn-off-anaconda-eldoc-mode)
-              (anaconda-mode -1))))
-
 
 
 ;; ;; TODO
 ;; ADD
 ;; - writeroom-mode-support
 ;; - a switch for serif fonts in buffer (maybe with a hook for latex-buffers) see emacswiki ""faces-per-buffer""
-;; - flycheck default dictionary, flycheck language-switch
+;; - olivetti-mode
 ;; - load a separate file my-snippets.el for the defun my/* functions that I use
 ;; - use proper hook! macros for doom config!
 ;; Shortcut for fullscreen/fullframe toggle!
 ;; Add deft!
 
 ;; DEBUG
-;; - TODO Add "IMPORTANT" keyword in text highlight
 ;; - Emacs-client + daemon setup
 ;; - better scrolling
-;; - change background colour / adaptive background colour
 
 ;; ADOPT
 ;; - org-roam-capture
@@ -613,12 +646,10 @@
 ;; - better use of ivy and company
 
 ;; IMPROVE
-;; - systematic elisp tutorial
-;; - do some work in a modal programming environment
-;; - add "circadian" package for daytime-dependent themes
-;; - try to use helm instead of ivy?
+;; - change background colour / adaptive background colour
 ;; - add shellscript to open up emacsclients natively with .org files
-
+;; - default template for latex (central config file)
+;; - templates for org-capture
 
 ;; ;; define default article class
 ;; ;; (after! org

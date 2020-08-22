@@ -53,7 +53,7 @@
 
 (package! maxframe)
 (package! visual-fill-column)
-(package! beacon)
+(package! beacon) ; blink cursor when scrolling
 (package! org-ref)
 (package! ivy-bibtex)
 (package! org-roam-bibtex)
@@ -61,5 +61,6 @@
 (package! latex-extra)
 (package! expand-region)
 (package! zen-mode)
+(package! impatient-mode) ; live html and markdown preview
 
 ;; (package! abbrev)

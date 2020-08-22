@@ -13,7 +13,9 @@
 
 (define-abbrev-table 'array-mode-abbrev-table '())
 
-(define-abbrev-table 'awk-mode-abbrev-table '())
+(define-abbrev-table 'awk-mode-abbrev-table
+  '(
+   ))
 
 (define-abbrev-table 'biblio-selection-mode-abbrev-table '())
 
@@ -23,9 +25,13 @@
 
 (define-abbrev-table 'bookmark-edit-annotation-mode-abbrev-table '())
 
-(define-abbrev-table 'c++-mode-abbrev-table '())
+(define-abbrev-table 'c++-mode-abbrev-table
+  '(
+   ))
 
-(define-abbrev-table 'c-mode-abbrev-table '())
+(define-abbrev-table 'c-mode-abbrev-table
+  '(
+   ))
 
 (define-abbrev-table 'calendar-mode-abbrev-table '())
 
@@ -52,6 +58,8 @@
 (define-abbrev-table 'conf-windows-mode-abbrev-table '())
 
 (define-abbrev-table 'conf-xdefaults-mode-abbrev-table '())
+
+(define-abbrev-table 'css-mode-abbrev-table '())
 
 (define-abbrev-table 'debugger-mode-abbrev-table '())
 
@@ -94,6 +102,8 @@
 (define-abbrev-table 'git-commit-elisp-text-mode-abbrev-table '())
 
 (define-abbrev-table 'gitconfig-mode-abbrev-table '())
+
+(define-abbrev-table 'gitignore-mode-abbrev-table '())
 
 (define-abbrev-table 'global-abbrev-table
   '(
@@ -179,13 +189,14 @@
     ("8zeta" "ζ" my/expand-without-space 0)
     ("BUt" "But" nil 3)
     ("CHeck" "Check" nil 2)
+    ("DIe" "Die" nil 2)
     ("FOr" "For" nil 1)
     ("HUsserl" "Husserl" nil 7)
-    ("THe" "The" nil 39)
+    ("THe" "The" nil 47)
     ("THen" "Then" nil 3)
     ("THere" "There" nil 4)
     ("THey" "They" nil 1)
-    ("THis" "This" nil 22)
+    ("THis" "This" nil 25)
     ("THomas" "Thomas" nil 3)
     ("THose" "Those" nil 1)
     ("THus" "Thus" nil 6)
@@ -206,9 +217,11 @@
     ("jsut" "just" nil 4)
     ("konw" "know" nil 1)
     ("lanugage" "language" nil 1)
-    ("mpy" "Merleau-Ponty" nil 5)
+    ("liek" "like" nil 1)
+    ("mpy" "Merleau-Ponty" nil 10)
     ("mroe" "more" nil 2)
     ("nad" "and" nil 7)
+    ("onyl" "only" nil 1)
     ("otehr" "other" nil 2)
     ("owrld" "world" nil 1)
     ("phenical" "phenomenological" nil 1)
@@ -220,11 +233,13 @@
     ("pogy" "phenomenology" nil 3)
     ("quetsion" "question" nil 1)
     ("quetsions" "questions" nil 1)
-    ("taht" "that" nil 10)
-    ("teh" "the" nil 15)
+    ("taht" "that" nil 12)
+    ("teh" "the" nil 19)
     ("tehse" "these" nil 1)
     ("throuhg" "through" nil 1)
     ("tiem" "time" nil 2)
+    ("udnerstand" "understand" nil 1)
+    ("undertand" "understand" nil 1)
     ("vism" "verificationism" nil 2)
     ("vist" "verificationist" nil 1)
     ("vists" "verificationists" nil 0)
@@ -245,6 +260,8 @@
 
 (define-abbrev-table 'helpful-mode-abbrev-table '())
 
+(define-abbrev-table 'html-mode-abbrev-table '())
+
 (define-abbrev-table 'ibuffer-mode-abbrev-table '())
 
 (define-abbrev-table 'idl-mode-abbrev-table '())
@@ -255,7 +272,13 @@
 
 (define-abbrev-table 'ivy-occur-mode-abbrev-table '())
 
-(define-abbrev-table 'java-mode-abbrev-table '())
+(define-abbrev-table 'java-mode-abbrev-table
+  '(
+   ))
+
+(define-abbrev-table 'js-jsx-mode-abbrev-table '())
+
+(define-abbrev-table 'js-mode-abbrev-table '())
 
 (define-abbrev-table 'latex-mode-abbrev-table
   '(
@@ -325,7 +348,14 @@
 
 (define-abbrev-table 'messages-buffer-mode-abbrev-table '())
 
-(define-abbrev-table 'objc-mode-abbrev-table '())
+(define-abbrev-table 'mhtml-mode-abbrev-table
+  '(
+    ("8nd" "&ndash;" nil 1)
+   ))
+
+(define-abbrev-table 'objc-mode-abbrev-table
+  '(
+   ))
 
 (define-abbrev-table 'occur-edit-mode-abbrev-table '())
 
@@ -356,7 +386,9 @@
 
 (define-abbrev-table 'pdf-outline-buffer-mode-abbrev-table '())
 
-(define-abbrev-table 'pike-mode-abbrev-table '())
+(define-abbrev-table 'pike-mode-abbrev-table
+  '(
+   ))
 
 (define-abbrev-table 'plain-tex-mode-abbrev-table '())
 
@@ -382,7 +414,11 @@
 
 (define-abbrev-table 'rxt-help-mode-abbrev-table '())
 
+(define-abbrev-table 'scss-mode-abbrev-table '())
+
 (define-abbrev-table 'select-tags-table-mode-abbrev-table '())
+
+(define-abbrev-table 'sgml-mode-abbrev-table '())
 
 (define-abbrev-table 'sh-mode-abbrev-table '())
 
