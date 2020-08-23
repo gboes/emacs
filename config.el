@@ -243,7 +243,7 @@
   (other-window 1))
 
 
-(load! "move-text.el")
+(load! "defuns/move-text.el")
 ;; ;; global keybindings
 (map! "C-1"       #'comment-line ; quick comment toggle
       ;; "C-c r"     #'eval-region
