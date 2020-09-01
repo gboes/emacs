@@ -31,7 +31,7 @@
            )
           ((eq system-type 'gnu/linux)
            ;; Linux-specific code goes here.
-           (setq doom-font (font-spec :family "monospace" :size 25 ))
+           (setq doom-font (font-spec :family "monospace" :size 28 ))
            (setq org-directory "/home/greg/sync/Dropbox/org/"
                  org_roam_dir (concat org-directory "roam")
                  org-roam-directory org_roam_dir
@@ -39,7 +39,7 @@
                  )
              (when (string-match "-[Mm]icrosoft"  operating-system-release)
              ;; WSL specific code goes here
-               (setq doom-font (font-spec :family "monospace" :size 15 ))
+               (setq doom-font (font-spec :family "monospace" :size 16 ))
                (setq org-directory "/mnt/d/Dropbox/org/"
                      org_roam_dir (concat org-directory "roam")
                      org-roam-directory org_roam_dir
@@ -243,7 +243,9 @@
   (other-window 1))
 
 
-(load! "defuns/move-text.el")
+(load "~/.doom.d/defuns/move-text.el")
+(load "~/.doom.d/defuns/unfill-region.el")
+
 ;; ;; global keybindings
 (map! "C-1"       #'comment-line ; quick comment toggle
       ;; "C-c r"     #'eval-region
