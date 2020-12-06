@@ -62,5 +62,8 @@
 (package! expand-region)
 (package! zen-mode)
 (package! impatient-mode) ; live html and markdown preview
-
+(package! olivetti)
+(package! auto-dim-other-buffers)
+(package! org-gcal)
+(package! elpy)
 ;; (package! abbrev)
