@@ -66,4 +66,10 @@
 (package! auto-dim-other-buffers)
 (package! org-gcal)
 (package! elpy)
+(package! modus-operandi-theme)
+(package! modus-vivendi-theme)
+(package! spacemacs-theme)
+;; (package! avy) ; jump to point on screen - is integrated already?
+(package! atomic-chrome)
+;; (package! typewriter-mode)
 ;; (package! abbrev)

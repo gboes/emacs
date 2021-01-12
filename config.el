@@ -4,6 +4,8 @@
 ;; sync' after modifying this file!
 
 
+(setq load-prefer-newer t) ; do not load outdated bytecompiled .elc code
+
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Gregor Bös"
@@ -46,7 +48,10 @@
              (when (string-match "-[Mm]icrosoft"  operating-system-release)
              ;; WSL specific code goes here
                (setq doom-font (font-spec :family "monospace" :size 24 ))
-               (setq doom-variable-pitch-font (font-spec :family "EB Garamond" :size 30 ))
+               (setq doom-variable-pitch-font (font-spec :family "EB Garamond" :size 34 ))
+               ;; Try ET Bembo / ET Book at some point
+               ;; (setq doom-variable-pitch-font (font-spec :family "ETBookOT" :size 34 ))
+               (print(font-family-list))
                (set-face-attribute 'variable-pitch nil :height 170) ; with EB Garamond
                (setq org-directory "/mnt/d/Dropbox/org/"
                      org_roam_dir (concat org-directory "roam")
@@ -76,15 +81,19 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-;; (setq doom-theme 'doom-one)
-;; (setq doom-theme 'doom-vibrant)
-;; (setq doom-theme 'doom-city-lights)
-;; (setq doom-theme 'doom-solarized-light)
-;; (custom-set-faces! '(default :background "AntiqueWhite2"))
-;; (custom-set-faces! '(default :background "AntiqueWhite2"))
- (load-theme 'doom-solarized-light t)
-(setq doom-theme 'doom-solarized-light)
-; better visible selection
+;; (setq doom-theme 'doom-one) ; good colour scheme, quite dark
+;; (setq doom-theme 'doom-vibrant) ; more contrast
+;; (setq doom-theme 'doom-manegarm) ; more dark brown background
+;; (load-theme 'doom-gruvbox) ; medium-dark theme with warm colours
+;; (load-theme 'doom-solarized-light)
+
+
+(defvar theme-dark nil)
+(defun my/load-theme-light ()
+  "Load the light theme."
+  (interactive)
+  (load-theme 'doom-solarized-light t)
+  ;; (load-theme 'doom-solarized-light t) ; Good alternative: Spacemacs light theme
 (set-face-background 'highlight "#19aae3")
 ; better visible active region
 (set-face-background 'region "#ffeeb0")
@@ -96,6 +105,56 @@
     ;; (set-face-foreground 'custom-comment-tag "#a69d92") ;better readable preamble in org mode, possibly causing a startup error
     )
 
+  (setq theme-dark nil)
+  )
+
+(defun my/load-theme-dark ()
+  "Load the dark theme."
+  (interactive)
+  (disable-theme 'doom-solarized-light)
+  (turn-off-solaire-mode)
+  (load-theme 'doom-gruvbox t)
+  (setq theme-dark t)
+  )
+
+
+(defun my/theme-toggle ()
+  "Toggle between light and dark themes."
+  (interactive)
+  (if theme-dark
+  (my/load-theme-light)
+  (my/load-theme-dark)))
+(global-set-key [f5] 'my/theme-toggle)
+
+;; By default: start with dark theme
+(my/load-theme-dark)
+;; (setq doom-theme 'doom-city-lights)
+;; (setq doom-theme 'doom-solarized-light)
+;; (custom-set-faces! '(default :background "AntiqueWhite2"))
+;; (custom-set-faces! '(default :background "AntiqueWhite2"))
+
+;; (setq doom-theme 'modus-operandi)
+;; (setq doom-theme 'modus-vivendi)
+
+;;;;;;;;;;;;;;; Solarized Theme settings ;;;;;;;;;;;;
+;; (load-theme 'doom-solarized-light t)
+;; (setq doom-theme 'doom-solarized-light)
+;; ; better visible selection
+;; (set-face-background 'highlight "#19aae3")
+;; ; better visible active region
+;; (set-face-background 'region "#ffeeb0")
+;; ; better visible cursor
+;; (set-face-background 'cursor "#11ccd6")
+;; ;; (after! org-mode
+;; (after! org
+;; 	(set-face-foreground 'org-document-info-keyword "#a69d92")
+;;     ;; (set-face-foreground 'custom-comment-tag "#a69d92") ;better readable preamble in org mode, possibly causing a startup error
+;;     )
+;;;;;;; END Solarized Theme settings ;;;;;;;;;;;;
+
+
+
+
 ;; Edit fonts for variable-pitch-mode
 ;; (set-face-attribute 'default nil :font "Hack-16")
 ;; (set-face-attribute 'fixed-pitch nil :font "Hack-16")
@@ -105,6 +164,7 @@
 
 (use-package! mixed-pitch
   :hook (text-mode . mixed-pitch-mode)
+  :defer
   :config
   (setq mixed-pitch-set-height t))
 ; better visible active line default:#F2E6CE
@@ -141,6 +201,12 @@
 
 
 ;; PERSONAL CONFIG
+;; start in fullscreen
+;; (add-to-list 'initial-frame-alist '(fullscreen . maximized)) ; didn't work with WSL and X410
+;; (add-to-list 'initial-frame-alist '(fullscreen . fullboth))
+(add-to-list 'initial-frame-alist '(fullscreen . fullscreen))
+
+
 
 ;;;;; Small global adjustments
 (setq delete-by-moving-to-trash t)      ; Use system recycle bin
@@ -149,6 +215,8 @@
 (setq display-time-24hr-format t)
 (setq-default left-margin-width 1)
 (set-window-buffer nil (current-buffer))
+(setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode latex-mode))
+(setq doom-modeline-enable-word-count 1) ; show word counts in text modes
 ;; (global-subword-mode 1) ; word boundaries in CamelCased Words
 (setq-default flyspell-default-dictionary "en_GB-ize-w_accents")
 ;-ize endings with British English as default dictionary. 
@@ -162,6 +230,15 @@
 ;; (setq org-M-RET-may-split-line '(("default" . 1)
 ;;                                  ("headline" . 1))) ;this is supposed to work?
 
+; Show wordcount in Org mode.
+(after! doom-modeline
+  (add-to-list 'doom-modeline-continuous-word-count-modes 'org-mode)
+
+  (doom-modeline-def-modeline 'main
+    ;; we add the word-count segment at the end
+    '(bar window-number matches buffer-info remote-host buffer-position selection-info word-count)
+    '(objed-state misc-info persp-name irc mu4e github debug input-method buffer-encoding lsp major-mode process vcs checker)))
+
 ;; Use a bash shell -- conflicts with my/latex-word-count, enables pomodoro utility
 ;; (setq shell-file-name "bash")
 ;; ;; initialize bash aliases
@@ -170,13 +247,16 @@
 
 ;;;;;; Mode-Hooks
 
-(add-hook! 'text-mode-hook #'hl-todo-mode)
 
-(add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
-(add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
+(add-hook! 'text-mode-hook #'hl-todo-mode)
+(add-hook! 'writeroom-mode-hook '(lambda () (text-scale-adjust 0)))
+; Try disabling for olivetti DEBUG
+;; (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
+;; (add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
+; end DEBUG
 ;; (add-hook! 'org-mode-hook (setq line-number-mode nil))
 ;; (add-hook 'org-mode-hook (setq line-number-mode nil))
-(add-hook! 'octave-mode-hook (lambda () (abbrev-mode 1) (auto-fill-mode 1)
+(add-hook! 'octave-mode-hook '(lambda () (abbrev-mode 1) (auto-fill-mode 1)
                                (if (eq window-system 'x)(font-lock-mode 1))))
 
 
@@ -195,7 +275,7 @@
 
 ;; better visulization for parentheses
 (use-package! rainbow-delimiters
-  ;; :defer
+  :defer
   ;; :init
   ;; (setq-default rainbow-delimiters-mode)
   ;; (setq-default electric-pair-mode)
@@ -205,7 +285,7 @@
    (prog-mode . smartparens-mode)
    )
   :config
-  (add-hook 'latex-mode-hook (lambda () (rainbow-delimiters-mode -1)))
+  (add-hook 'latex-mode-hook '(lambda () (rainbow-delimiters-mode -1)))
          ;; (sh-mode . rainbow-delimiters-mode)
         )
 
@@ -263,11 +343,18 @@
       ))
 
 (defun my/kill-other-buffer ()
-  "Kills the buffer in the opposite window."
+  "Kill the buffer in the opposite window."
   (interactive)
   (other-window 1)
   (kill-this-buffer)
   (other-window 1))
+
+(defun my/kill-line ()
+  "Kill the rest of the line; if at line beginning: kill whole line."
+  (interactive)
+  (if (eq (line-beginning-position) (point))
+    (kill-whole-line)
+    (kill-line)))
 
 
 (load "~/.doom.d/defuns/move-text.el")
@@ -277,7 +364,12 @@
 (map! "C-1"       #'comment-line ; quick comment toggle
       ;; "C-c r"     #'eval-region
       ;; "C-z"       #'undo-tree-undo
+      ;; "C-k"       #'kill-whole-line
+      "C-k"       #'my/kill-line
       "C-z"       #'undo-fu-only-undo
+      "M-w"       #'clipboard-kill-ring-save ;make copy available in clipboard
+      "C-S-s"     #'isearch-forward-regexp
+      "C-S-r"     #'isearch-backward-regexp
       ;; "C-S-z"     #'undo-tree-redo
       "C-S-z"     #'undo-fu-only-redo
       "C-S-d"     #'duplicate-line-or-region
@@ -299,14 +391,17 @@
       "C-x w"     #'kill-this-buffer
       "C-x W"     #'my/kill-other-buffer
       "C-x <SPC>" #'other-window
-      "C-<"       #'previous-buffer
-      "C-<tab>"       #'previous-buffer
-      "C->"       #'next-buffer
-      "<C-S-iso-lefttab>"       #'next-buffer
+      ;; "C-<"       #'previous-buffer
+      "C-<tab>"       #'next-buffer
+      ;; "C->"       #'next-buffer
+      "<C-S-iso-lefttab>"       #'previous-buffer
       "C-x <C-SPC>" #'ivy-switch-buffer-other-window
-      "<S-f11>"   #'toggle-frame-maximized
+      ;; "<S-f11>"   #'toggle-frame-maximized
       "C-x C-r" #'helm-recentf
+      "<f9>" #'writeroom-mode
+      "C-c m b" #'my/html-recording-button-wrap
       )
+
 
 ;; TODO Rebind to local maps
 ;; syntax example:
@@ -316,10 +411,9 @@
 
 
 
-;; (use-package! zen-mode)
-;; (global-set-key (kbd "C-M-z") 'zen-mode)
-
 (use-package! hl-todo
+  ;; This should not be activated in Org mode though
+  :after org
   :init
   (setq hl-todo-highlight-punctuation ":"
       hl-todo-keyword-faces
@@ -335,9 +429,14 @@
             ("DEPRECATED" font-lock-doc-face bold)
             )))
 
+(use-package! avy
+  :defer t
+  :bind ("C-<" . avy-goto-word-1))
+
 
 ;; ABBREV-Mode
 (use-package! abbrev
+  :defer
   :init
   (setq-default abbrev-mode t)
   ;; :hook
@@ -405,6 +504,15 @@
                          (shell-quote-argument buffer-file-name)
                          ))))
 
+(defun my/push-to-boox ()
+  "Copy current file synchronized location."
+  (interactive)
+  (let ((boox-dir "/mnt/d/gdrive/boox/review/"))
+  (buffer-file-name)
+  (shell-command (concat "cp '"(buffer-file-name) "' " boox-dir ))))
+
+(print (file-name-quote (buffer-file-name)))
+
 (after! hi-lock-mode
 ;; (set-face-background 'hi-yellow "#ebe37c")
 (defun my/highlight-long-sentences (X)
@@ -422,6 +530,7 @@
 ;;     ('LaTeX-mode-hook TeX-fold-mode))
   ;; (add-hook! 'latex-mode-hook (lambda () (TeX-fold-mode -1)))
   ;; Use pdf-tools to open PDF files
+  :defer t
   :config
 (setq
  TeX-view-program-selection '((output-pdf "PDF Tools"))
@@ -432,6 +541,7 @@
           #'TeX-revert-document-buffer)
 (add-hook! 'LaTeX-mode-hook #'visual-line-mode)
 (add-hook! 'LaTeX-mode-hook #'turn-off-auto-fill)
+(add-hook! 'TeX-update-style-hook 'hl-todo-mode)
 (setq TeX-save-query nil)
 ;; (add-hook 'LaTeX-mode-hook (lambda () (rainbow-delimiters-mode rainbow-delimiters-mode-disablede-hook (flyspell-lazy-mode)))
 ;; (add-hook! 'LaTeX-mode-hook (lambda () (TeX-fold-mode -1)))
@@ -519,6 +629,7 @@ Allows wrapping quotes, too."
   ;; :bind ("\"" .  my/TeX-insert-quote)
   :config
   ;; (add-hook! 'latex-mode-hook #'latex-extra-mode)
+
   (map!
    :map LaTeX-mode-map
         "C-c j" #'latex/next-section
@@ -558,6 +669,19 @@ Allows wrapping quotes, too."
 ;;  FLYSPELL
 ;; ==========
 
+
+;; TODO Define orglatex exporters
+;; (defun my/org-latex-headless-export
+;;     "Export an org buffer into a latex body without any preamble"
+;;   (interactive)
+;;   )
+
+;; (defun my/org-latex-standalone-export
+;;     "Export an org buffer into a standalone latex class (allows for inclusion into other files or standalone compilation)"
+;;   (interactive)
+;;     )
+
+
 (defun my/flyspell-save-word ()
   "Add a word to the personal dictionary."
   :after 'flyspell
@@ -595,6 +719,8 @@ Allows wrapping quotes, too."
 
 
 (use-package! org-pdftools
+  :after org
+  :defer
   :hook (org-load . org-pdftools-setup-link))
 
 
@@ -612,7 +738,38 @@ Allows wrapping quotes, too."
    "C-c f C-n" #'(lambda() (interactive) (org-emphasize ? ))
    )
   )
+
+(defun my/org-enable-margins ()
+  (interactive)
+  (progn
+  ;; Add spacing around the top, increase by header-line-face-height
+    (setq header-line-format " ")
+    (set-face-attribute 'header-line nil :height 200)
+    (setq line-spacing 0.1)
+    (setq left-margin-width 14)
+    (setq right-margin-width 14)
+    ;; (setq visual-fill-column-extra-text-width '(24 . 24))
+    ;; reset the buffer to make changes visible
+    (set-window-buffer nil (current-buffer))
+    ))
+
+(after! org
+  (setq org-insert-heading-respect-content nil)
+  (setq org-hide-emphasis-markers t)
+  (add-hook! org-mode (hl-line-mode 0))
+  (add-hook! org-mode (display-line-numbers-mode 0))
+  (add-hook! org-mode (electric-indent-local-mode -1))
+  (add-hook! org-mode 'my/org-enable-margins)
+  (add-hook! org-mode 'turn-off-solaire-mode)
+  ;; Let org commands work with point on any of the leading asterisks
+  (setq org-use-speed-commands
+        (lambda ()
+          (and (looking-at org-outline-regexp)
+               (looking-back "^\**"))))
+  )
+
 ;;;; org-roam
+
 
 (use-package! org-journal
       :after org-roam
@@ -656,6 +813,7 @@ Allows wrapping quotes, too."
 
 
 (use-package! org-roam
+  :after org
   :config
   (setq org-roam-capture-templates
         '(
@@ -804,11 +962,12 @@ Allows wrapping quotes, too."
 
 (use-package! olivetti
   ;; adapted from protesilaos.com
+  :defer
   :ensure
   :diminish
   :config
   (setq olivetti-body-width 0.5)
-  (setq olivetti-minimum-body-width 40)
+  (setq olivetti-minimum-body-width 40) ; should try to enlarge proportional fonts instead
   (setq olivetti-recall-visual-line-mode-entry-state t)
 
   (define-minor-mode prot/olivetti-mode
@@ -823,28 +982,70 @@ except for programming modes (see `variable-pitch-mode')."
     (if prot/olivetti-mode
         (progn
           (olivetti-mode 1)
-          (setq olivetti-body-width 40)
           (set-window-fringes (selected-window) 0 0)
           (variable-pitch-mode 1)
+          (redraw-frame (selected-frame))
           ;; (prot/cursor-type-mode 1)
           (unless (derived-mode-p 'prog-mode)
-            (hide-mode-line-mode 1))
+            (hide-mode-line-mode 1)
+            (prot/scroll-centre-cursor-mode 1)
+            (display-line-numbers-mode -1)
+            (setq olivetti-body-width 50))
           (redraw-frame (selected-frame)))
-      (olivetti-mode -1)
-      (set-window-fringes (selected-window) nil) ; Use default width
-      (variable-pitch-mode -1)
-      (unless (derived-mode-p 'prog-mode)
-        (hide-mode-line-mode -1))
+        (olivetti-mode -1)
+        (set-window-fringes (selected-window) nil) ; Use default width
+        (variable-pitch-mode -1)
+        (unless (derived-mode-p 'prog-mode)
+          (turn-off-hide-mode-line-mode)
+          (display-line-numbers-mode t))
+        (prot/scroll-centre-cursor-mode -1)
       (redraw-frame (selected-frame))
       ))
-  :bind ("C-c o" . prot/olivetti-mode))
+
+  (defun my/olivetti-on ()
+      "Enable writing environment with olivetti & Co."
+    (interactive)
+    (olivetti-mode 1)
+    (set-window-fringes (selected-window) 0 0)
+    (variable-pitch-mode 1)
+    (redraw-frame (selected-frame))
+    (unless (derived-mode-p 'prog-mode)
+        ;; What to do if not in a prog mode
+      (hide-mode-line-mode 1)
+      (prot/scroll-centre-cursor-mode 1)
+      (display-line-numbers-mode -1)
+      (setq olivetti-body-width 50)
+      (redraw-frame (selected-frame))
+      ))
+
+
+  (defun my/olivetti-off ()
+      "Disable writing environment with olivetti & Co."
+    (interactive)
+    (olivetti-mode -1)
+    (set-window-fringes (selected-window) nil) ; Use default width
+    (hide-mode-line-mode -1)
+    (display-line-numbers-mode 1)
+    (setq redraw-frame (selected-frame))
+    )
+
 
 ;; Always enable scroll-centre cursor mode
-(add-hook! 'prot/olivetti-mode-hook #'prot/scroll-centre-cursor-mode)
+
+  ;; :bind ("C-c o" . prot/olivetti-mode)
+  :bind ("C-c o" . my/olivetti-on)
+  ("C-c O" . my/olivetti-off)
+  )
+
+  ;; (add-hook! text-mode-hook #'prot/olivetti-mode)
+  ;; (add-hook! 'olivetti-mode-hook '(lambda() (redraw-frame)))
+  ;; (add-hook! 'olivetti-mode-hook #'prot/scroll-centre-cursor-mode)
+  ;; (add-hook! 'prot/olivetti-mode-hook #'(lambda() (display-line-numbers-mode -1)))
 
 
 ;; Allow Dimming of other buffers
 (use-package! auto-dim-other-buffers
+  :defer t
   :ensure
   :commands auto-dim-other-buffers-mode
   :config
@@ -856,8 +1057,7 @@ except for programming modes (see `variable-pitch-mode')."
 ;; ====================
 
 ;; set local key: C-c g to +lookup/definition
-(use-package elpy
-  :ensure t
+(use-package! elpy
   :defer t
   :init
   (advice-add 'python-mode :before 'elpy-enable))
@@ -875,6 +1075,7 @@ except for programming modes (see `variable-pitch-mode')."
 (defvar disable-tramp-backups '(all))   ;fewer requests without autosaves
 (setq tramp-verbose 10)
 ;; Disable completion when remote-editing.
+
 (add-hook
  'python-mode-hook
  (lambda () (when (file-remote-p default-directory)
@@ -941,12 +1142,64 @@ except for programming modes (see `variable-pitch-mode')."
 ;; ;;   ;; default packages for all latex exports
 ;; ;;   (add-to-list 'org-latex-packages-alist '("" "amsmath"))
 ;; ;; )
+;; (custom-set-variables
+;;  ;; custom-set-variables was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;; '(package-selected-packages (quote (olivetti auto-dim-other-buffers))))
+;; (custom-set-faces
+;;  ;; custom-set-faces was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;;  )
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages (quote (olivetti auto-dim-other-buffers))))
+ '(ansi-color-names-vector
+   ["#FFFBEA" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#556b72"])
+ '(custom-safe-themes
+   (quote
+    ("e2acbf379aa541e07373395b977a99c878c30f20c3761aac23e9223345526bcc" "0cb1b0ea66b145ad9b9e34c850ea8e842c4c4c83abe04e37455a1ef4cc5b8791" default)))
+ '(doom-modeline-mode t t)
+ '(fci-rule-color "#D6D6D6")
+ '(jdee-db-active-breakpoint-face-colors (cons "#FFFBF0" "#268bd2"))
+ '(jdee-db-requested-breakpoint-face-colors (cons "#FFFBF0" "#859900"))
+ '(jdee-db-spec-breakpoint-face-colors (cons "#FFFBF0" "#E1DBCD"))
+ '(objed-cursor-color "#dc322f")
+ '(org-journal-date-format "%A, %d %B %Y")
+ '(org-journal-date-prefix "#+TITLE: ")
+ '(org-journal-dir "/mnt/d/Dropbox/org/roam/journal/")
+ '(org-journal-file-format "%Y-%m-%d.org")
+ '(pdf-view-midnight-colors (cons "#556b72" "#FDF6E3"))
+ '(rustic-ansi-faces
+   ["#FDF6E3" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#556b72"])
+ '(setq t t)
+ '(vc-annotate-background "#FDF6E3")
+ '(vc-annotate-color-map
+   (list
+    (cons 20 "#859900")
+    (cons 40 "#959300")
+    (cons 60 "#a58e00")
+    (cons 80 "#b58900")
+    (cons 100 "#bc7407")
+    (cons 120 "#c35f0e")
+    (cons 140 "#cb4b16")
+    (cons 160 "#cd4439")
+    (cons 180 "#d03d5d")
+    (cons 200 "#d33682")
+    (cons 220 "#d63466")
+    (cons 240 "#d9334a")
+    (cons 260 "#dc322f")
+    (cons 280 "#dd5c56")
+    (cons 300 "#de867e")
+    (cons 320 "#dfb0a5")
+    (cons 340 "#D6D6D6")
+    (cons 360 "#D6D6D6")))
+ '(vc-annotate-very-old-color nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
