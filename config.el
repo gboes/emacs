@@ -3,6 +3,9 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
+;; (use-package esup ;emacs startup profiler package
+;;   :ensure t
+;;   )
 
 (setq load-prefer-newer t) ; do not load outdated bytecompiled .elc code
 
@@ -10,6 +13,14 @@
 ;; clients, file templates and snippets.
 (setq user-full-name "Gregor Bös"
       user-mail-address "mail@gregorboes.com")
+
+(setq ws-butler-global-exempt-modes ; where ws-butler is distracting
+      '(special-mode
+        comint-mode
+        term-mode
+        eshell-mode
+        ;; markdown-mode
+        text-mode)) ; includes inherited modes
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -29,6 +40,7 @@
            ;; Windows-specific code goes here.
            (setq doom-font (font-spec :family "monospace" :size 15 ))
            (setq doom-font (font-spec :family "variable-pitch" :size 15 ))
+           (setq conf-directory "/mnt/d/gdrive/conf/")
            (setq phd-directory "/mnt/d/Dropbox/PhD/TeX/")
            (setq org-directory "/mnt/d/Dropbox/org/"
                  org_roam_dir (concat org-directory "roam")
@@ -46,18 +58,24 @@
                  org-roam-db-location "/home/greg/org-roam.db"
                  )
              (when (string-match "-[Mm]icrosoft"  operating-system-release)
-             ;; WSL specific code goes here
-               (setq doom-font (font-spec :family "monospace" :size 24 ))
-               (setq doom-variable-pitch-font (font-spec :family "EB Garamond" :size 34 ))
-               ;; Try ET Bembo / ET Book at some point
-               ;; (setq doom-variable-pitch-font (font-spec :family "ETBookOT" :size 34 ))
-               (print(font-family-list))
-               (set-face-attribute 'variable-pitch nil :height 170) ; with EB Garamond
+               ;; WSL specific code goes here
                (setq org-directory "/mnt/d/Dropbox/org/"
                      org_roam_dir (concat org-directory "roam")
                      org-roam-directory org_roam_dir
                      org-roam-db-location "/mnt/d/Temporary-Data/org-roam.db"
                      )
+               (setq conf-directory "/mnt/d/gdrive/conf/")
+               (setq phd-directory "/mnt/d/Dropbox/PhD/TeX/")
+               (setq org-directory "/mnt/d/Dropbox/org/")
+               (setq org_roam_dir (concat org-directory "roam"))
+               (setq org-roam-directory org_roam_dir)
+               (setq doom-font (font-spec :family "monospace" :size 24 ))
+               ;; (setq doom-variable-pitch-font (font-spec :family "EB Garamond" :size 34 ))
+               ;; Try ET Bembo / ET Book at some point
+               (setq doom-variable-pitch-font (font-spec :family "ETBembo" :size 34 ))
+               (setq doom-unicode-font (font-spec :family "Symbola")) ; fallsback for unicode font seems overriden
+               ;; (insert (prin1-to-string (font-family-list)))
+               (set-face-attribute 'variable-pitch nil :height 170) ; with EB Garamond
              ;; (set-face-attribute 'variable-pitch nil :font "Noto Serif-12")
                ;; (set-face-attribute 'variable-pitch nil :font "EB Garamond")
                ;; (set-face-attribute 'variable-pitch nil :font "IBM Plex Serif")
@@ -87,47 +105,85 @@
 ;; (load-theme 'doom-gruvbox) ; medium-dark theme with warm colours
 ;; (load-theme 'doom-solarized-light)
 
-
 (defvar theme-dark nil)
-(defun my/load-theme-light ()
-  "Load the light theme."
-  (interactive)
-  (load-theme 'doom-solarized-light t)
-  ;; (load-theme 'doom-solarized-light t) ; Good alternative: Spacemacs light theme
-(set-face-background 'highlight "#19aae3")
-; better visible active region
-(set-face-background 'region "#ffeeb0")
-; better visible cursor
-(set-face-background 'cursor "#11ccd6")
-;; (after! org-mode
-(after! org
-	(set-face-foreground 'org-document-info-keyword "#a69d92")
-    ;; (set-face-foreground 'custom-comment-tag "#a69d92") ;better readable preamble in org mode, possibly causing a startup error
-    )
+;; (defun my/load-theme-light ()
+;;   "Load the light theme."
+;;   (interactive)
+;;   (load-theme 'doom-solarized-light t)
+;;   ;; (load-theme 'doom-solarized-light t) ; Good alternative: Spacemacs light theme
+;; (set-face-background 'highlight "#19aae3")
+;; ; better visible active region
+;; (set-face-background 'region "#ffeeb0")
+;; ; better visible cursor
+;; (set-face-background 'cursor "#11ccd6")
+;; ;; (after! org-mode
+;; (after! org
+;; 	(set-face-foreground 'org-document-info-keyword "#a69d92")
+;;     ;; (set-face-foreground 'custom-comment-tag "#a69d92") ;better readable preamble in org mode, possibly causing a startup error
+;;     )
 
-  (setq theme-dark nil)
-  )
+  ;; (setq theme-dark nil)
+  ;; )
 
-(defun my/load-theme-dark ()
-  "Load the dark theme."
-  (interactive)
-  (disable-theme 'doom-solarized-light)
-  (turn-off-solaire-mode)
-  (load-theme 'doom-gruvbox t)
-  (setq theme-dark t)
-  )
+;; (defun my/load-theme-dark ()
+;;   "Load the dark theme."
+;;   (interactive)
+;;   (disable-theme 'doom-solarized-light)
+;;   ;; (turn-off-solaire-mode)
+;;   (load-theme 'doom-gruvbox t)
+;;   (setq theme-dark t)
+;;   )
+
+
 
 
 (defun my/theme-toggle ()
   "Toggle between light and dark themes."
   (interactive)
   (if theme-dark
-  (my/load-theme-light)
-  (my/load-theme-dark)))
-(global-set-key [f5] 'my/theme-toggle)
+      (progn
+        (disable-theme 'doom-gruvbox)
+        ;; (enable-theme 'spacemacs-light)
+        ;; (load-theme 'doom-solarized-light t)
+        ;; (enable-theme 'doom-solarized-light)
+        (enable-theme 'doom-solarized-light)
+        (set-face-background 'beacon-fallback-background "#AntiqueWhite2")
+        (setq beacon-color "#fff480")
 
-;; By default: start with dark theme
-(my/load-theme-dark)
+        (custom-set-faces! '(org-ellipsis :foreground "#c1dbcd")) ; darker ellipsis
+        (setq theme-dark nil))
+; toggling to dark
+    (progn
+      (disable-theme 'doom-solarized-light)
+      ;; (turn-off-solaire-mode) ; if it's still enabled afterwards
+        (condition-case err
+            ;; Enable the theme if emacs already has it
+            (enable-theme 'doom-gruvbox)
+          (setq beacon-color 0.5)
+          ;; Otherwise load it
+          (error (load-theme 'doom-gruvbox t)))
+       (setq theme-dark t))))
+  ;; (my/load-theme-light)
+  ;; (my/load-theme-dark)))
+(global-set-key [f5] 'my/theme-toggle)
+;; Load default theme
+;; (my/load-theme-dark)
+
+; Load both themes eagerly at startup, later produces conflicts with font spec
+(load-theme 'doom-solarized-light t)
+(disable-theme 'doom-solarized-light)
+(load-theme 'doom-gruvbox t)
+(after! org
+  (setq org-priority-faces
+        '((65 . error)
+          (66 . warning)
+          (67 . (:foreground "lightblue"))
+          (68 . success)
+          (69 . white))))
+;; (load-theme 'doom-gruvbox-light t)	;
+
+;; (set-fontset-font t 'unicode font nil 'prepend)))
+
 ;; (setq doom-theme 'doom-city-lights)
 ;; (setq doom-theme 'doom-solarized-light)
 ;; (custom-set-faces! '(default :background "AntiqueWhite2"))
@@ -165,10 +221,11 @@
 (use-package! mixed-pitch
   :hook (text-mode . mixed-pitch-mode)
   :defer
+  :diminish
   :config
   (setq mixed-pitch-set-height t))
 ; better visible active line default:#F2E6CE
-;; (set-face-background 'beacon-fallback-background "#AntiqueWhite2")
+
 ;; (set-face-attribute 'hl-line nil
 ;;                       :foreground nil
 ;;                       :background  "#000000")
@@ -210,34 +267,63 @@
 
 ;;;;; Small global adjustments
 (setq delete-by-moving-to-trash t)      ; Use system recycle bin
+(after! gcmh
+  ;; (setq gcmh-high-cons-threshold 67108864) ; 64MB garb. coll.
+  ;; (setq garbage-collection-messages t)
+  (setq inhibit-compacting-font-caches nil)
+  (setq gcmh-high-cons-threshold 33554432)) ; 32MB garb. coll. threshold, shouldn't be >64MB
 (delete-selection-mode 1)
-(display-time-mode 1)
-(setq display-time-24hr-format t)
-(setq-default left-margin-width 1)
+;; (setq-default left-margin-width 1) ; if used as default at least not in pdftools
 (set-window-buffer nil (current-buffer))
-(setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode latex-mode))
-(setq doom-modeline-enable-word-count 1) ; show word counts in text modes
-;; (global-subword-mode 1) ; word boundaries in CamelCased Words
 (setq-default flyspell-default-dictionary "en_GB-ize-w_accents")
-;-ize endings with British English as default dictionary. 
+;;-ize endings with British English as default dictionary.
 (setq-default ispell-dictionary "en_GB-ize-w_accents")
+(setq-default ispell-personal-dictionary (concat conf-directory ".aspell.en.pws"))
+(after! writegood ; don't highlight passive voice
+(writegood-passive-voice-turn-off))
 (setq reftex-default-bibliography '("/mnt/d/Dropbox/org/full_zotbib.bib"))
 (setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
 (if (eq initial-window-system 'x)       ; Start in fullscreen
     (toggle-frame-maximized)
   (toggle-frame-fullscreen))
+ ; keep whitespace around point (only in buffer, not on disk)
+;; (add-hook! 'text-mode-hook #'(setq ws-butler-keep-whitespace-before-point t))
 ;; newchange:
-;; (setq org-M-RET-may-split-line '(("default" . 1)
-;;                                  ("headline" . 1))) ;this is supposed to work?
 
-; Show wordcount in Org mode.
-(after! doom-modeline
-  (add-to-list 'doom-modeline-continuous-word-count-modes 'org-mode)
+;;;Doom Modeline
+(setq doom-modeline-icon (display-graphic-p))
+(setq doom-modeline-major-mode-icon t)
 
-  (doom-modeline-def-modeline 'main
-    ;; we add the word-count segment at the end
-    '(bar window-number matches buffer-info remote-host buffer-position selection-info word-count)
-    '(objed-state misc-info persp-name irc mu4e github debug input-method buffer-encoding lsp major-mode process vcs checker)))
+(defun doom-modeline-conditional-buffer-encoding ()
+  "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case (from tecosaur)"
+  (setq-local doom-modeline-buffer-encoding
+              (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
+                                 '(coding-category-undecided coding-category-utf-8))
+                           (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
+                t)))
+(add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
+
+; 28/6/21: This doesn't quite work yet: how can I move my clock to the right?
+;; (setq mode-line-misc-info  (concat (format-time-string "%H:%M") mode-line-misc-info))
+;; (format-time-string "%H:%M")
+;; (print mode-line-misc-info)
+;; (push '(format-time-string "%H:%M") mode-line-misc-info)
+(display-time-mode 1)
+(setq display-time-24hr-format t)
+
+
+;; (setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode latex-mode)) ; wc-mode can slow things down, I have heard
+;; (setq doom-modeline-enable-word-count 0) ; show word counts in text modes
+;; (global-subword-mode 1) ; word boundaries in CamelCased Words
+
+;; ; Show wordcount in Org mode.
+;; (after! doom-modeline
+;;   (add-to-list 'doom-modeline-continuous-word-count-modes 'org-mode)
+
+;;   (doom-modeline-def-modeline 'main
+;;     ;; we add the word-count segment at the end
+;;     '(bar window-number matches buffer-info remote-host buffer-position selection-info word-count)
+;;     '(objed-state misc-info persp-name irc mu4e github debug input-method buffer-encoding lsp major-mode process vcs checker)))
 
 ;; Use a bash shell -- conflicts with my/latex-word-count, enables pomodoro utility
 ;; (setq shell-file-name "bash")
@@ -249,7 +335,10 @@
 
 
 (add-hook! 'text-mode-hook #'hl-todo-mode)
-(add-hook! 'writeroom-mode-hook '(lambda () (text-scale-adjust 0)))
+(add-hook! 'text-mode-hook #'beacon-mode)
+(setq beacon-blink-delay 0.2)
+(setq beacon-blink-duration 0.2)
+(add-hook! 'writeroom-mode-hook (lambda () (text-scale-adjust 0)))
 ; Try disabling for olivetti DEBUG
 ;; (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
 ;; (add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
@@ -276,6 +365,7 @@
 ;; better visulization for parentheses
 (use-package! rainbow-delimiters
   :defer
+  :diminish
   ;; :init
   ;; (setq-default rainbow-delimiters-mode)
   ;; (setq-default electric-pair-mode)
@@ -290,6 +380,13 @@
         )
 
 ;; General keybindings
+;;; aliases for two unbound transpose commands
+;;; might deserve their own keybinding
+(defalias 'ts 'transpose-sentences)
+(defalias 'tp 'transpose-paragraphs)
+; hard to remember function name for display magnification
+(defalias 'zoom 'text-scale-adjust)
+;;; definitions for dragging lines up and down
 (defmacro save-column (&rest body)
   `(let ((column (current-column)))
      (unwind-protect
@@ -342,6 +439,16 @@
       (forward-char)
       ))
 
+(defun my/downcase-previous-word ()
+  "Transform word before cursor to lowercase.
+   Leaves exactly one space behind it."
+  (interactive)
+  (backward-word)
+  (downcase-word 1)
+  (if (= 32 (char-after)) ; check for whitespace
+      (forward-char)
+      ))
+
 (defun my/kill-other-buffer ()
   "Kill the buffer in the opposite window."
   (interactive)
@@ -356,15 +463,24 @@
     (kill-whole-line)
     (kill-line)))
 
+(after! smartparens
+  (defun my/comment-line ()
+    "Toggle comment of line; if empty, start new comment."
+    (interactive)
+    (if (sp-point-in-blank-line)
+        (comment-dwim ())
+      (comment-line ()))))
+
 
 (load "~/.doom.d/defuns/move-text.el")
 (load "~/.doom.d/defuns/unfill-region.el")
 
 ;; ;; global keybindings
-(map! "C-1"       #'comment-line ; quick comment toggle
+(map! "C-1"       #'my/comment-line ; quick comment toggle
       ;; "C-c r"     #'eval-region
       ;; "C-z"       #'undo-tree-undo
       ;; "C-k"       #'kill-whole-line
+      "C-c Q"   #'doom/delete-this-file
       "C-k"       #'my/kill-line
       "C-z"       #'undo-fu-only-undo
       "M-w"       #'clipboard-kill-ring-save ;make copy available in clipboard
@@ -375,6 +491,7 @@
       "C-S-d"     #'duplicate-line-or-region
       "<C-S-SPC>" #'fixup-whitespace
       "M-C"     #'my/capitalize-previous-word
+      "M-L"     #'my/downcase-previous-word
       ;; movement
       "<C-right>" #'forward-word
       "<C-left>"  #'backward-word
@@ -391,10 +508,12 @@
       "C-x w"     #'kill-this-buffer
       "C-x W"     #'my/kill-other-buffer
       "C-x <SPC>" #'other-window
+      "C-x <up>" #'enlarge-window-horizontally
+      "C-x <down>" #'shrink-window-horizontally
       ;; "C-<"       #'previous-buffer
-      "C-<tab>"       #'next-buffer
+      "C-<tab>"       #'previous-buffer
       ;; "C->"       #'next-buffer
-      "<C-S-iso-lefttab>"       #'previous-buffer
+      "<C-S-iso-lefttab>" #'next-buffer
       "C-x <C-SPC>" #'ivy-switch-buffer-other-window
       ;; "<S-f11>"   #'toggle-frame-maximized
       "C-x C-r" #'helm-recentf
@@ -410,14 +529,25 @@
 ;;       :nive "h" #'+workspace/other)
 
 
+(after! winner-mode
+  ;; configure window management shortcuts
+  ;; Default case: Use F9 to focus on a window, F7 to go back to previous window config.
+  (map!
+  "[f7]" #'winner-undo
+ "[C-f7]" #'winner-redo
+ "[f9]" #'delete-other-windows
+ "[C-f9]" #'delete-window
+  ))
+
 
 (use-package! hl-todo
   ;; This should not be activated in Org mode though
   :after org
+  :diminish
   :init
   (setq hl-todo-highlight-punctuation ":"
       hl-todo-keyword-faces
-          `(("TODO"       warning bold)
+          `(("TODO"       font-lock-keyword-face warning bold)
             ("CRITICAL"       error bold)
             ("FIXME"      error bold)
             ("DEBUG"      error bold)
@@ -431,7 +561,9 @@
 
 (use-package! avy
   :defer t
-  :bind ("C-<" . avy-goto-word-1))
+  :diminish
+  :bind ("C-<" . avy-goto-word-1)
+        ("C-ö" . avy-goto-word-1))
 
 
 ;; ABBREV-Mode
@@ -478,6 +610,25 @@
                          "'"
                          )))))
 
+(defun my/org-latex-word-count ()
+  "Run texcount on the associated file."
+  (interactive)
+  (display-message-or-buffer
+   (concat "Total word count in associated .tex file: "
+    (shell-command-to-string (concat "texcount "
+                       ; " optional arguments "
+                         "-inc "
+                         "-sum "
+                         ;; "-total "
+                         ;; "-brief "
+                         "-0 " ; only a total number as output
+                         "'"
+                         (concat (file-name-sans-extension(
+                                   buffer-file-name)) ".tex")
+                         "'"
+                         )))))
+
+
 ;; (defun my/pomodoro-session-start (task)
 ;;   "Call the pomodoro utility in the background to log a work session."
 ;;   (interactive "sFocus of the next 25 minutes: ")
@@ -511,8 +662,6 @@
   (buffer-file-name)
   (shell-command (concat "cp '"(buffer-file-name) "' " boox-dir ))))
 
-(print (file-name-quote (buffer-file-name)))
-
 (after! hi-lock-mode
 ;; (set-face-background 'hi-yellow "#ebe37c")
 (defun my/highlight-long-sentences (X)
@@ -543,6 +692,7 @@
 (add-hook! 'LaTeX-mode-hook #'turn-off-auto-fill)
 (add-hook! 'TeX-update-style-hook 'hl-todo-mode)
 (setq TeX-save-query nil)
+(setq reftex-cite-prompt-optional-args t)
 ;; (add-hook 'LaTeX-mode-hook (lambda () (rainbow-delimiters-mode rainbow-delimiters-mode-disablede-hook (flyspell-lazy-mode)))
 ;; (add-hook! 'LaTeX-mode-hook (lambda () (TeX-fold-mode -1)))
   )
@@ -582,9 +732,10 @@
 (defun my/reftex-toc ()
   "Rescan the index before displaying it."
   (interactive)
-  ;; (reftex-toc-rescan)
   (reftex-toc)
+  (reftex-toc-rescan)
   )
+
 
 
 (defun my/TeX-insert-quote ()
@@ -629,13 +780,25 @@ Allows wrapping quotes, too."
   ;; :bind ("\"" .  my/TeX-insert-quote)
   :config
   ;; (add-hook! 'latex-mode-hook #'latex-extra-mode)
-
+  ;; Do not create a buffer if it is already open in a different frame. For pdfsync with AucTeX and pdf tools.
+  ;; Source: https://www.reddit.com/r/emacs/comments/iil1lg/ask_auctex_with_pdftools_to_sync_pdf_in_another/
+  ;; FIXME Does not seem to load right at startup
+  (push
+ '(".*\\.pdf$" . (nil (reusable-frames . t)
+                      (inhibit-switch-frame . nil)))
+ display-buffer-alist)
+  (push
+ '(".*\\.tex$" . (nil (reusable-frames . t)
+                      (inhibit-switch-frame . nil)))
+ display-buffer-alist)
   (map!
    :map LaTeX-mode-map
+        "-" #'self-insert-command ; instead of weird LaTeX-babel hyphens
         "C-c j" #'latex/next-section
         "C-c C-f" #'TeX-font
         "\"" #'my/TeX-insert-quote
         "C-d" #'my/TeX-delete-char
+        "<delete>" #'my/TeX-delete-char
         "<backspace>" #'my/TeX-delete-backward-char
         "C-c f" #'latex/next-section-same-level
        ;; "C-i" #'TeX-complete-symbol
@@ -644,6 +807,8 @@ Allows wrapping quotes, too."
         "C-c C-o" #'latex/hide-show-all
         "C-c n" #'TeX-narrow-to-group
         "C-c c" #'reftex-citation
+        "C-c +"       #'er/expand-region
+        "C-c -"         (lambda () (interactive) (er/expand-region -1))
         ;; "C-c t" #'reftex-toc
         "C-c t" #'my/reftex-toc
         "<C-mouse-1>" #'pdf-sync-forward-search ;somehow buggy
@@ -730,14 +895,29 @@ Allows wrapping quotes, too."
   (setq org-support-shift-select t)     ;shift-selection outside of special environments
   (setq org-todo-keywords
         '((sequence "TODO(t)" "STARTED(s)" "WAIT(w)" "HOLD(h)" "|" "DONE(d)" )))
+  (setq org-priority-highest 65)
+  (setq org-priority-lowest 69)
   (map!
    :map org-mode-map
    "C-c f C-e" #'(lambda() (interactive) (org-emphasize ?/))
+   "C-c f e" #'(lambda() (interactive) (org-emphasize ?/))
+   "C-i" #'(lambda() (interactive) (org-emphasize ?/))
    "C-c f C-b" #'(lambda() (interactive) (org-emphasize ?*))
+   "C-c f b" #'(lambda() (interactive) (org-emphasize ?*))
+   ;; "C-b" #'(lambda() (interactive) (org-emphasize ?*)) ; Clashes with a navigation command
    "C-c f C-u" #'(lambda() (interactive) (org-emphasize ?_))
    "C-c f C-n" #'(lambda() (interactive) (org-emphasize ? ))
+   "C-c f n" #'(lambda() (interactive) (org-emphasize ? ))
+   "C-c e c" #'org-icalendar-export-to-ics
+   "C-c t" #'counsel-org-goto ; similar to ToC command in auctex
+   "C-c C-t" #'counsel-org-goto
+   "<f8>" #'(lambda ()(interactive); repeat last org-export
+               (let ((current-prefix-arg '(4))) ; simulate universal prefix argument C-u
+                 (call-interactively #'org-export-dispatch)))
+   "C-c W" #'my/org-latex-word-count
    )
   )
+
 
 (defun my/org-enable-margins ()
   (interactive)
@@ -745,10 +925,10 @@ Allows wrapping quotes, too."
   ;; Add spacing around the top, increase by header-line-face-height
     (setq header-line-format " ")
     (set-face-attribute 'header-line nil :height 200)
-    (setq line-spacing 0.1)
+    ;; (setq line-spacing 0.1)
     (setq left-margin-width 14)
     (setq right-margin-width 14)
-    ;; (setq visual-fill-column-extra-text-width '(24 . 24))
+    (setq visual-fill-column-extra-text-width '(24 . 24))
     ;; reset the buffer to make changes visible
     (set-window-buffer nil (current-buffer))
     ))
@@ -756,19 +936,57 @@ Allows wrapping quotes, too."
 (after! org
   (setq org-insert-heading-respect-content nil)
   (setq org-hide-emphasis-markers t)
-  (add-hook! org-mode (hl-line-mode 0))
+   ;; Org Agenda: Store file names in list and add files with org-agenda-file-to-front
+  (setq org-agenda-files "/mnt/d/Dropbox/org/agenda-file-list.org")
+  ;; would be better: construct file names from list + environment variables (org-path!)
+  ;; Some good regex-based solutions here:
+  ;; https://stackoverflow.com/questions/11384516/how-to-make-all-org-files-under-a-folder-added-in-agenda-list-automatically?rq=1
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.5))
+  (setq org-pretty-entities-include-sub-superscripts t)
+  (setq org-ellipsis "  ") ;; folding symbol
+  (setq org-bullets-bullet-list '(" ")) ; No bullets
+  (setq org-M-RET-may-split-line t) ; allow to split org headings with M-RET
+  (setq org-ctrl-k-protect-subtree t) ; do not kill hidden subtress with C-k
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "SPECIFY(s)" "STARTED(r)" "WAIT(w)" "|" "FAILED(f)" "KILL(k)" "DELEGATED(l)" "DONE(d)")))
+  (setq org-priority-faces
+        '((65 . error)
+          (66 . warning)
+          (67 . (:foreground "lightblue"))
+          (68 . success)
+          (69 . white)))
+  ;; (setq org-tag-alist nil)
+  (setq org-journal-tag-alist '(("PhD_writing" . ?w) ("PhD_reading" . ?r)
+                                ("exploration" . ?e) ("procrastination" . ?P)
+                                ("paper_writing" . ?p)
+                                   ("social" . ?S) ("admin" . ?a) ("work" . ?W)
+                                   ("skill_development") ("attendance" . ?A)
+                                   ("weekly_reading") ("background_reading")
+                                   ("academic_sideproject") ("dead_time" . ?D)
+                                   ("sports" . ?s) ("zis" . ?z)
+                                   ("application" . ?n)))
+  (setq org-clock-persist 'history)
+  (org-clock-persistence-insinuate)
+  (add-hook! org-mode (hl-line-mode 0)) ; turn off hl-line in org mode
   (add-hook! org-mode (display-line-numbers-mode 0))
-  (add-hook! org-mode (electric-indent-local-mode -1))
-  (add-hook! org-mode 'my/org-enable-margins)
-  (add-hook! org-mode 'turn-off-solaire-mode)
+  ;; (add-hook! org-mode (electric-indent-local-mode -1))
+  (add-hook! org-mode my/org-enable-margins)
+  ;; (add-hook! org-mode 'turn-off-solaire-mode)
   ;; Let org commands work with point on any of the leading asterisks
   (setq org-use-speed-commands
         (lambda ()
           (and (looking-at org-outline-regexp)
                (looking-back "^\**"))))
-  )
+  (defalias 'counsel-org-goto 'my/org-jump)
+  (defalias 'counsel-org-goto 'my/org-toc))
 
 ;;;; org-roam
+
+(use-package! org-bullets
+  :after org
+  :init
+  (add-hook! 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  )
 
 
 (use-package! org-journal
@@ -779,8 +997,10 @@ Allows wrapping quotes, too."
       :init
       (map!
        "C-c r j" #'org-journal-new-entry
+       "C-c r J" #'org-journal-new-date-entry
        )
       :custom
+      (setq org-extend-today-until 3) ; include entries before 3AM in previous day
       (org-journal-dir (concat org_roam_dir "/journal/"))
       (org-journal-date-prefix "#+TITLE: ")
       (org-journal-file-format "%Y-%m-%d.org")
@@ -797,23 +1017,64 @@ Allows wrapping quotes, too."
     ;; (setq org-journal-enable-agenda-integration t)
     ;; )
 
+;; Org-Ref starting slowing things down and I don't really need it
+(use-package! org-ref
+    :after org
+    :config
+    (setq
+         org-ref-completion-library 'org-ref-ivy-cite
+         org-ref-get-pdf-filename-function 'org-ref-get-pdf-filename-ivy-bibtex
+         bibtex-completion-bibliography (concat org-directory "/full_zotbib.bib")
+         ivy-bibtex-default-action 'ivy-bibtex-insert-key ;; maybe change to insert reference; then set default "autocite"
+         org-ref-default-bibliography (list (concat org-directory "/full_zotbib.bib"))
+         org-ref-bibliography-notes (concat org_roam_dir "/notes/bibnotes.org")
+         org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n"
+         org-ref-notes-directory  (concat org_roam_dir "/notes/")
+         org-ref-notes-function 'orb-edit-notes
+         company-reftex-max-annotation-length 30
+         )
+    (map! :map latex-mode-map "C-c b" #'ivy-bibtex)
+          ;; "C-c B" #'ivy-bibtex-insert-reference
+          ;; "C-c v" #'ivy-bibtex-insert-reference)
+    ;; (ivy-set-actions 'ivy-bibtex '(("p" ivy-bibtex-open-any "Open PDF, URL, or DOI")))
+    )
 
-;; (use-package! org-ref
-;;     :after org
-;;     :config
-;;     (setq
-;;          org-ref-completion-library 'org-ref-ivy-cite
-;;          org-ref-get-pdf-filename-function 'org-ref-get-pdf-filename-ivy-bibtex
-;;          org-ref-default-bibliography (list "/mnt/d/gdrive/org/full_zotbib.bib")
-;;          org-ref-bibliography-notes "/mnt/d/gdrive/org/roam/notes/bibnotes.org"
-;;          org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n"
-;;          org-ref-notes-directory  "/mnt/d/gdrive/org/roam/notes"
-;;          org-ref-notes-function 'orb-edit-notes
-;;     ))
+
+;; (setq
+;;  org-ref-default-bibliography '("/mnt/d/Dropbox/org/full_zotbib.bib")
+;;  bibtex-completion-notes-path "/mnt/d/Dropbox/org/roam/orbnotes/"
+;;  bibtex-completion-bibliography "/mnt/d/Dropbox/org/full_zotbib.bib"
+;;  bibtex-completion-pdf-field "file"
+;;  bibtex-completion-notes-template-multiple-files
+;;  (concat
+;;   "#+TITLE: ${title}\n"
+;;   "#+ROAM_KEY: cite:${=key=}\n"
+;;   "* TODO Notes\n"
+;;   ":PROPERTIES:\n"
+;;   ":Custom_ID: ${=key=}\n"
+;;   ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
+;;   ":AUTHOR: ${author-abbrev}\n"
+;;   ":JOURNAL: ${journaltitle}\n"
+;;   ":DATE: ${date}\n"
+;;   ":YEAR: ${year}\n"
+;;   ":DOI: ${doi}\n"
+;;   ":URL: ${url}\n"
+;;   ":END:\n\n"
+;;   )
+;;  )
+
+
+
+
+
+
+
+
 
 
 (use-package! org-roam
   :after org
+  :diminish
   :config
   (setq org-roam-capture-templates
         '(
@@ -823,11 +1084,19 @@ Allows wrapping quotes, too."
            :head "#+TITLE: ${title}\n#+ROAM_KEY: %<%Y-%m-%d>_${slug}\n\n"
            "%?"
            :unnarrowed t)
+          ;; Possible way to separate some roam files for Agenda inclusion:
+          ;; ("a" "agenda" plain (function org-roam--capture-get-point)
+          ;;  :file-name "agenda/%<%Y-%m-%d>_${slug}"
+          ;;  ;; :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}"
+          ;;  :head "#+TITLE: ${title}\n#+ROAM_KEY: %<%Y-%m-%d>_${slug}\n\n"
+          ;;  "%?"
+          ;;  :unnarrowed t)
           ))
   (setq +org-roam-open-buffer-on-find-file nil) ; inhibit roam buffer
   :init
   (map! "C-c r t" #'org-roam-buffer-toggle-display
         "C-c r f" #'org-roam-find-file
+        "C-c r b" #'org-roam-buffer-toggle-display
         "C-c r i" #'org-roam-insert
         "C-c r c" #'org-roam-capture
         "C-c r g" #'org-open-at-point
@@ -840,29 +1109,6 @@ Allows wrapping quotes, too."
 
 ;; (print org-roam-capture-templates)
 
-
-(setq
- org-ref-default-bibliography '("/mnt/d/Dropbox/org/full_zotbib.bib")
- bibtex-completion-notes-path "/mnt/d/Dropbox/org/roam/orbnotes/"
- bibtex-completion-bibliography "/mnt/d/Dropbox/org/full_zotbib.bib"
- bibtex-completion-pdf-field "file"
- bibtex-completion-notes-template-multiple-files
- (concat
-  "#+TITLE: ${title}\n"
-  "#+ROAM_KEY: cite:${=key=}\n"
-  "* TODO Notes\n"
-  ":PROPERTIES:\n"
-  ":Custom_ID: ${=key=}\n"
-  ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
-  ":AUTHOR: ${author-abbrev}\n"
-  ":JOURNAL: ${journaltitle}\n"
-  ":DATE: ${date}\n"
-  ":YEAR: ${year}\n"
-  ":DOI: ${doi}\n"
-  ":URL: ${url}\n"
-  ":END:\n\n"
-  )
- )
 
 ;;; define categories that should be excluded
 (setq org-export-exclude-category (list "google" "private"))
@@ -886,7 +1132,8 @@ Allows wrapping quotes, too."
  ;; keyboard shortcuts
  (define-key pdf-view-mode-map (kbd "h") 'pdf-annot-add-highlight-markup-annotation)
  (define-key pdf-view-mode-map (kbd "t") 'pdf-annot-add-text-annotation)
- (define-key pdf-view-mode-map (kbd "D") 'pdf-annot-delete))
+ (define-key pdf-view-mode-map (kbd "D") 'pdf-annot-delete)
+ (define-key pdf-view-mode-map (kbd "C-S-p") 'my/push-to-boox))
 
 
 
@@ -966,8 +1213,9 @@ Allows wrapping quotes, too."
   :ensure
   :diminish
   :config
-  (setq olivetti-body-width 0.5)
-  (setq olivetti-minimum-body-width 40) ; should try to enlarge proportional fonts instead
+  ;; (setq olivetti-body-width 0.5)
+  (setq olivetti-body-width 30)
+  (setq olivetti-minimum-body-width 25) ; should try to enlarge proportional fonts instead
   (setq olivetti-recall-visual-line-mode-entry-state t)
 
   (define-minor-mode prot/olivetti-mode
@@ -990,7 +1238,8 @@ except for programming modes (see `variable-pitch-mode')."
             (hide-mode-line-mode 1)
             (prot/scroll-centre-cursor-mode 1)
             (display-line-numbers-mode -1)
-            (setq olivetti-body-width 50))
+            ;; (setq olivetti-body-width 0.5)
+            )
           (redraw-frame (selected-frame)))
         (olivetti-mode -1)
         (set-window-fringes (selected-window) nil) ; Use default width
@@ -1004,20 +1253,24 @@ except for programming modes (see `variable-pitch-mode')."
 
   (defun my/olivetti-on ()
       "Enable writing environment with olivetti & Co."
-    (interactive)
+      (interactive)
     (olivetti-mode 1)
     (set-window-fringes (selected-window) 0 0)
-    (variable-pitch-mode 1)
+    ;; (variable-pitch-mode 1)
     (redraw-frame (selected-frame))
     (unless (derived-mode-p 'prog-mode)
         ;; What to do if not in a prog mode
-      (hide-mode-line-mode 1)
+      ;; (hide-mode-line-mode 1)
       (prot/scroll-centre-cursor-mode 1)
       (display-line-numbers-mode -1)
-      (setq olivetti-body-width 50)
+      ;; (setq olivetti-body-width 0.5)
+      ;; (setq olivetti-body-width 30)
+      ;; (beacon-mode 0)
+      (org-bullets-mode 1) ; hide bullets
       (redraw-frame (selected-frame))
       ))
 
+  ;; add a shortcut for hiding mode-line
 
   (defun my/olivetti-off ()
       "Disable writing environment with olivetti & Co."
@@ -1041,16 +1294,6 @@ except for programming modes (see `variable-pitch-mode')."
   ;; (add-hook! 'olivetti-mode-hook '(lambda() (redraw-frame)))
   ;; (add-hook! 'olivetti-mode-hook #'prot/scroll-centre-cursor-mode)
   ;; (add-hook! 'prot/olivetti-mode-hook #'(lambda() (display-line-numbers-mode -1)))
-
-
-;; Allow Dimming of other buffers
-(use-package! auto-dim-other-buffers
-  :defer t
-  :ensure
-  :commands auto-dim-other-buffers-mode
-  :config
-  (setq auto-dim-other-buffers-dim-on-switch-to-minibuffer nil)
-  (setq auto-dim-other-buffers-dim-on-focus-out t))
 
 ;; ====================
 ;; PYTHON
@@ -1117,10 +1360,29 @@ except for programming modes (see `variable-pitch-mode')."
 ;; - templates for org-capture
 
 ;; ;; define default article class
-;; ;; (after! org
-;; ;;   (add-to-list 'org-latex-classes
-;; ;;                '("article
-;; ;;                  \\documentclass[12pt,a4paper]{article}
+(after! org
+  (add-to-list 'org-latex-classes
+               '("kcl-beamer"
+                 "\\documentclass[presentation, usepdftitle=false, aspectratio=1610]{beamer}
+                  \\usepackage{preamble-lualatex}
+                  \\include{preamble}
+                 [NO-DEFAULT-PACKAGES]
+                 [NO-PACKAGES]"
+                  ("\\section{%s}" . "\\section*{%s}")
+                  ("\\subsection{%s}" . "\\subsection*{%s}")
+                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+  (add-to-list 'org-latex-classes
+               '("phd-chapter"
+                 "\\documentclass[class=article, crop=false]{standalone}
+                  \\usepackage{standalone}
+                  \\usepackage{phd_chapter}
+                  \\usepackage[authordate, backend=biber, bibencoding=utf8, cmsdate=both]{biblatex-chicago} % for original-dates
+                  \\bibliography{/mnt/d/Dropbox/org/full_zotbib.bib} %Ubuntu Path
+                  \\input {chapter_bibstyles.tex}"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+
 ;; ;; \\usepackage [a4paper]{geometry}
 ;; ;; \\usepackage[german, ngerman, english ]{babel}
 ;; ;; \\usepackage{lmodern}
@@ -1135,74 +1397,9 @@ except for programming modes (see `variable-pitch-mode')."
 ;; ;; \\sodef\\so{}{.14em}{.4em plus.1em minus .1em}{.4em plus.1em minus .1em}
 ;; ;; \\setlength {\\parskip}{1em plus 1 em minus 0.5em}
 ;; ;; \\usepackage{graphicx} % for includegraphics command"
-;; ;;                  ))
 
 ;; ;;   ;; define default dissertation class
 ;; ;;   ;; define default beamer class
 ;; ;;   ;; default packages for all latex exports
 ;; ;;   (add-to-list 'org-latex-packages-alist '("" "amsmath"))
 ;; ;; )
-;; (custom-set-variables
-;;  ;; custom-set-variables was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;; '(package-selected-packages (quote (olivetti auto-dim-other-buffers))))
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  )
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#FFFBEA" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#556b72"])
- '(custom-safe-themes
-   (quote
-    ("e2acbf379aa541e07373395b977a99c878c30f20c3761aac23e9223345526bcc" "0cb1b0ea66b145ad9b9e34c850ea8e842c4c4c83abe04e37455a1ef4cc5b8791" default)))
- '(doom-modeline-mode t t)
- '(fci-rule-color "#D6D6D6")
- '(jdee-db-active-breakpoint-face-colors (cons "#FFFBF0" "#268bd2"))
- '(jdee-db-requested-breakpoint-face-colors (cons "#FFFBF0" "#859900"))
- '(jdee-db-spec-breakpoint-face-colors (cons "#FFFBF0" "#E1DBCD"))
- '(objed-cursor-color "#dc322f")
- '(org-journal-date-format "%A, %d %B %Y")
- '(org-journal-date-prefix "#+TITLE: ")
- '(org-journal-dir "/mnt/d/Dropbox/org/roam/journal/")
- '(org-journal-file-format "%Y-%m-%d.org")
- '(pdf-view-midnight-colors (cons "#556b72" "#FDF6E3"))
- '(rustic-ansi-faces
-   ["#FDF6E3" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#556b72"])
- '(setq t t)
- '(vc-annotate-background "#FDF6E3")
- '(vc-annotate-color-map
-   (list
-    (cons 20 "#859900")
-    (cons 40 "#959300")
-    (cons 60 "#a58e00")
-    (cons 80 "#b58900")
-    (cons 100 "#bc7407")
-    (cons 120 "#c35f0e")
-    (cons 140 "#cb4b16")
-    (cons 160 "#cd4439")
-    (cons 180 "#d03d5d")
-    (cons 200 "#d33682")
-    (cons 220 "#d63466")
-    (cons 240 "#d9334a")
-    (cons 260 "#dc322f")
-    (cons 280 "#dd5c56")
-    (cons 300 "#de867e")
-    (cons 320 "#dfb0a5")
-    (cons 340 "#D6D6D6")
-    (cons 360 "#D6D6D6")))
- '(vc-annotate-very-old-color nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

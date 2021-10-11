@@ -50,7 +50,6 @@
 ;(unpin! t)
 
 ;; (package! pdf-tools)
-
 (package! maxframe)
 (package! visual-fill-column)
 (package! beacon) ; blink cursor when scrolling
@@ -60,16 +59,23 @@
 (package! org-journal)
 (package! latex-extra)
 (package! expand-region)
+(package! magit)
+(when (featurep! :tools magit)
+  (package! magit-section))
 (package! zen-mode)
 (package! impatient-mode) ; live html and markdown preview
 (package! olivetti)
 (package! auto-dim-other-buffers)
 (package! org-gcal)
 (package! elpy)
-(package! modus-operandi-theme)
-(package! modus-vivendi-theme)
+(package! modus-themes)
 (package! spacemacs-theme)
 ;; (package! avy) ; jump to point on screen - is integrated already?
 (package! atomic-chrome)
+;; (package! cycle-themes) ; didn't seem to work
+(package! org-bullets) ; for changing the main bullet
 ;; (package! typewriter-mode)
 ;; (package! abbrev)
+(package! esup) ; profiler for emacs startup time
+(package! benchmark-init)
+(package! atomic-chrome) ; Connect Emacs to Text Windows in Browsers - Firefox supported via "GhostText"
