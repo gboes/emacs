@@ -270,7 +270,8 @@
 (after! gcmh
   ;; (setq gcmh-high-cons-threshold 67108864) ; 64MB garb. coll.
   ;; (setq garbage-collection-messages t)
-  (setq inhibit-compacting-font-caches nil)
+  ;; (setq inhibit-compacting-font-caches nil)
+  (setq inhibit-compacting-font-caches t)
   (setq gcmh-high-cons-threshold 33554432)) ; 32MB garb. coll. threshold, shouldn't be >64MB
 (delete-selection-mode 1)
 ;; (setq-default left-margin-width 1) ; if used as default at least not in pdftools
@@ -386,6 +387,8 @@
 (defalias 'tp 'transpose-paragraphs)
 ; hard to remember function name for display magnification
 (defalias 'zoom 'text-scale-adjust)
+
+;;;;;;;;;; SNIPPETS -- should migrate to ./defuns/
 ;;; definitions for dragging lines up and down
 (defmacro save-column (&rest body)
   `(let ((column (current-column)))
@@ -393,6 +396,7 @@
          (progn ,@body)
        (move-to-column column))))
 (put 'save-column 'lisp-indent-function 0)
+
 
 (defun move-line-up ()
   (interactive)
@@ -470,8 +474,6 @@
     (if (sp-point-in-blank-line)
         (comment-dwim ())
       (comment-line ()))))
-
-
 (load "~/.doom.d/defuns/move-text.el")
 (load "~/.doom.d/defuns/unfill-region.el")
 
@@ -593,6 +595,8 @@
 ;; ============
 ;; LATEX
 ;; ============
+
+
 (defun my/latex-word-count ()
   "Run texcount on the current file."
   (interactive)
@@ -609,6 +613,25 @@
                          (buffer-file-name)
                          "'"
                          )))))
+
+(defun my/thesis-word-count ()
+  "Run texcount on the current file."
+  (interactive)
+  (display-message-or-buffer
+   (concat "Total word count: "
+    (shell-command-to-string (concat "cd /mnt/d/Dropbox/PhD/TeX/ && texcount "
+                       ; " optional arguments "
+                         "-inc "
+                         "-sum "
+                         ;; "-total "
+                         ;; "-brief "
+                         "-0 " ; only a total number as output
+                         "'"
+                         "master.tex "
+                         "'"
+                         )))))
+
+
 
 (defun my/org-latex-word-count ()
   "Run texcount on the associated file."
@@ -698,6 +721,7 @@
   )
 
 
+(load "~/.doom.d/defuns/latex-snippets.el")
 
 (defun my/TeX-delete-char ()
 "Delete TeX-quotes at once if encountered."
@@ -795,6 +819,7 @@ Allows wrapping quotes, too."
    :map LaTeX-mode-map
         "-" #'self-insert-command ; instead of weird LaTeX-babel hyphens
         "C-c j" #'latex/next-section
+        "'" #'my/TeX-insert-single-quote
         "C-c C-f" #'TeX-font
         "\"" #'my/TeX-insert-quote
         "C-d" #'my/TeX-delete-char
@@ -998,6 +1023,7 @@ Allows wrapping quotes, too."
       (map!
        "C-c r j" #'org-journal-new-entry
        "C-c r J" #'org-journal-new-date-entry
+       "C-c r w" #'my/thesis-word-count
        )
       :custom
       (setq org-extend-today-until 3) ; include entries before 3AM in previous day
@@ -1264,7 +1290,7 @@ except for programming modes (see `variable-pitch-mode')."
       (prot/scroll-centre-cursor-mode 1)
       (display-line-numbers-mode -1)
       ;; (setq olivetti-body-width 0.5)
-      ;; (setq olivetti-body-width 30)
+      (setq olivetti-body-width 30)
       ;; (beacon-mode 0)
       (org-bullets-mode 1) ; hide bullets
       (redraw-frame (selected-frame))
