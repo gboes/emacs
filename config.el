@@ -44,7 +44,6 @@
            (setq phd-directory "/mnt/d/Dropbox/PhD/TeX/")
            (setq org-directory "/mnt/d/Dropbox/org/"
                  org_roam_dir (concat org-directory "roam")
-                 org-roam-directory org_roam_dir
                  )
            )
           ((eq system-type 'gnu/linux)
@@ -59,21 +58,19 @@
                  )
              (when (string-match "-[Mm]icrosoft"  operating-system-release)
                ;; WSL specific code goes here
-               (setq org-directory "/mnt/d/Dropbox/org/"
-                     org_roam_dir (concat org-directory "roam")
-                     org-roam-directory org_roam_dir
-                     org-roam-db-location "/mnt/d/Temporary-Data/org-roam.db"
-                     )
-               (setq conf-directory "/mnt/d/gdrive/conf/")
-               (setq phd-directory "/mnt/d/Dropbox/PhD/TeX/")
-               (setq org-directory "/mnt/d/Dropbox/org/")
-               (setq org_roam_dir (concat org-directory "roam"))
+               (setq gdrive_dir "/mnt/d/gdrive/")
+               (setq conf-directory (concat gdrive_dir "/conf/"))
+               (setq dropbox_dir "/mnt/d/Dropbox/")
+               (setq phd-directory (concat dropbox_dir "/PhD/TeX"))
+               (setq org-directory (concat dropbox_dir "/org/"))
+               (setq org_roam_dir (concat org-directory "/roam/"))
                (setq org-roam-directory org_roam_dir)
+               (setq org-roam-db-location "/mnt/d/Temporary-Data/org-roam.db")
                (setq doom-font (font-spec :family "monospace" :size 24 ))
                ;; (setq doom-variable-pitch-font (font-spec :family "EB Garamond" :size 34 ))
                ;; Try ET Bembo / ET Book at some point
                (setq doom-variable-pitch-font (font-spec :family "ETBembo" :size 34 ))
-               (setq doom-unicode-font (font-spec :family "Symbola")) ; fallsback for unicode font seems overriden
+               (setq doom-unicode-font (font-spec :family "Symbola")) ; fallback for unicode font seems overriden
                ;; (insert (prin1-to-string (font-family-list)))
                (set-face-attribute 'variable-pitch nil :height 170) ; with EB Garamond
              ;; (set-face-attribute 'variable-pitch nil :font "Noto Serif-12")
@@ -267,6 +264,9 @@
 
 ;;;;; Small global adjustments
 (setq delete-by-moving-to-trash t)      ; Use system recycle bin
+(setq auto-save-default t)
+(setq auto-save-visited-file-name t)
+(setq bookmarks-save-flag 1) ; save bookmarks as they are created
 (after! gcmh
   ;; (setq gcmh-high-cons-threshold 67108864) ; 64MB garb. coll.
   ;; (setq garbage-collection-messages t)
@@ -279,7 +279,7 @@
 (setq-default flyspell-default-dictionary "en_GB-ize-w_accents")
 ;;-ize endings with British English as default dictionary.
 (setq-default ispell-dictionary "en_GB-ize-w_accents")
-(setq-default ispell-personal-dictionary (concat conf-directory ".aspell.en.pws"))
+(setq-default ispell-personal-dictionary (concat conf-directory ".aspell.en.pws")) ; custom dictionary
 (after! writegood ; don't highlight passive voice
 (writegood-passive-voice-turn-off))
 (setq reftex-default-bibliography '("/mnt/d/Dropbox/org/full_zotbib.bib"))
@@ -339,7 +339,8 @@
 (add-hook! 'text-mode-hook #'beacon-mode)
 (setq beacon-blink-delay 0.2)
 (setq beacon-blink-duration 0.2)
-(add-hook! 'writeroom-mode-hook (lambda () (text-scale-adjust 0)))
+(setq company-idle-delay 0.5)
+;; (add-hook! 'writeroom-mode-hook (lambda () (text-scale-adjust 0)))
 ; Try disabling for olivetti DEBUG
 ;; (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
 ;; (add-hook! 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
@@ -376,7 +377,7 @@
    (prog-mode . smartparens-mode)
    )
   :config
-  (add-hook 'latex-mode-hook '(lambda () (rainbow-delimiters-mode -1)))
+  (add-hook 'latex-mode-hook 'rainbow-delimiters-mode-disable)
          ;; (sh-mode . rainbow-delimiters-mode)
         )
 
@@ -460,6 +461,14 @@
   (kill-this-buffer)
   (other-window 1))
 
+
+(defun my/org-journal-new-entry-other-buffer ()
+  "Create journal entry in other window."
+  (interactive)
+  (other-window 1)
+  (org-journal-new-entry nil))
+
+
 (defun my/kill-line ()
   "Kill the rest of the line; if at line beginning: kill whole line."
   (interactive)
@@ -504,8 +513,10 @@
       "<M-right>" #'forward-sentence
       "<M-left>"  #'backward-sentence
       ;; shrinking and expanding regions
-      "C-c ."       #'er/expand-region
-      "C-c ,"         (lambda () (interactive) (er/expand-region -1)) ; overwritten by later keyset
+      "C-c C-+"       #'er/expand-region
+      "C-c x"       #'er/expand-region
+      "C-<"       #'er/expand-region ;could be freed for someting else. Search and replace?
+      "C-c C--"         (lambda () (interactive) (er/expand-region -1))
       ;; window management
       "C-x w"     #'kill-this-buffer
       "C-x W"     #'my/kill-other-buffer
@@ -518,8 +529,8 @@
       "<C-S-iso-lefttab>" #'next-buffer
       "C-x <C-SPC>" #'ivy-switch-buffer-other-window
       ;; "<S-f11>"   #'toggle-frame-maximized
-      "C-x C-r" #'helm-recentf
-      "<f9>" #'writeroom-mode
+      "C-x C-r" #'counsel-recentf
+      ;; "<f9>" #'writeroom-mode
       "C-c m b" #'my/html-recording-button-wrap
       )
 
@@ -531,16 +542,16 @@
 ;;       :nive "h" #'+workspace/other)
 
 
-(after! winner-mode
+(winner-mode 1)
+(after! winner
   ;; configure window management shortcuts
   ;; Default case: Use F9 to focus on a window, F7 to go back to previous window config.
   (map!
-  "[f7]" #'winner-undo
- "[C-f7]" #'winner-redo
- "[f9]" #'delete-other-windows
- "[C-f9]" #'delete-window
+  "<f7>" #'winner-undo
+ "S-<f7>" #'winner-redo
+ "<f9>" #'delete-other-windows
+ "C-<f9>" #'delete-window
   ))
-
 
 (use-package! hl-todo
   ;; This should not be activated in Org mode though
@@ -550,22 +561,25 @@
   (setq hl-todo-highlight-punctuation ":"
       hl-todo-keyword-faces
           `(("TODO"       font-lock-keyword-face warning bold)
-            ("CRITICAL"       error bold)
+            ("CRITICAL"       error bold italic)
             ("FIXME"      error bold)
             ("DEBUG"      error bold)
             ("IMPORTANT"      error bold italic)
             ("HACK"       font-lock-constant-face bold)
-            ("REVIEW"     font-lock-keyword-face bold)
-            ("SUGGESTION"     font-lock-keyword-face bold)
+            ("REVIEW"     warning bold)
+            ("SUGGESTION"     success bold)
+            ("CITE"     success bold)
+            ("cite"     success bold)
             ("NOTE"       success bold)
+            ("MAYBE"       warning bold)
             ("DEPRECATED" font-lock-doc-face bold)
             )))
 
-(use-package! avy
-  :defer t
-  :diminish
-  :bind ("C-<" . avy-goto-word-1)
-        ("C-ö" . avy-goto-word-1))
+;; (use-package! avy
+;;   :defer t
+;;   :diminish
+;;   :bind ("C-<" . avy-goto-word-1)
+;;         ("C-ö" . avy-goto-word-1))
 
 
 ;; ABBREV-Mode
@@ -722,6 +736,9 @@
 
 
 (load "~/.doom.d/defuns/latex-snippets.el")
+;; Scroll-other-window fix for pdftools
+(load "~/.doom.d/defuns/scroll-other-window.el")
+(sow-mode)
 
 (defun my/TeX-delete-char ()
 "Delete TeX-quotes at once if encountered."
@@ -753,12 +770,29 @@
     (delete-backward-char 1)
     )))
 
+
+(after! reftex
+  (setq reftex-toc-split-windows-fraction 0.2)
+  (setq reftex-toc-split-windows-horizontally t)
+  (add-hook! 'text-mode-hook #'hl-todo-mode)
+  (add-hook! 'reftex-toc-mode-hook #'org-indent-mode #'visual-line-mode)
+  )
+
 (defun my/reftex-toc ()
   "Rescan the index before displaying it."
   (interactive)
   (reftex-toc)
   (reftex-toc-rescan)
   )
+
+(defun my/reftex-toc-vertically ()
+  "Rescan the index before displaying it vertically."
+  (interactive)
+  (setq reftex-toc-split-windows-horizontally nil)
+  (reftex-toc)
+  (reftex-toc-rescan)
+  )
+
 
 
 
@@ -828,12 +862,11 @@ Allows wrapping quotes, too."
         "C-c f" #'latex/next-section-same-level
        ;; "C-i" #'TeX-complete-symbol
         "C-c i" #'helm-insert-latex-math
+        "C-S-t" #'transpose-sentences
         "C-c k" #'latex/previous-section
         "C-c C-o" #'latex/hide-show-all
         "C-c n" #'TeX-narrow-to-group
         "C-c c" #'reftex-citation
-        "C-c +"       #'er/expand-region
-        "C-c -"         (lambda () (interactive) (er/expand-region -1))
         ;; "C-c t" #'reftex-toc
         "C-c t" #'my/reftex-toc
         "<C-mouse-1>" #'pdf-sync-forward-search ;somehow buggy
@@ -944,21 +977,23 @@ Allows wrapping quotes, too."
   )
 
 
-(defun my/org-enable-margins ()
+
+
+(after! org
+  (defun my/org-enable-margins ()
   (interactive)
   (progn
   ;; Add spacing around the top, increase by header-line-face-height
     (setq header-line-format " ")
     (set-face-attribute 'header-line nil :height 200)
     ;; (setq line-spacing 0.1)
-    (setq left-margin-width 14)
-    (setq right-margin-width 14)
-    (setq visual-fill-column-extra-text-width '(24 . 24))
+    (setq left-margin-width 10)
+    (setq right-margin-width 10)
+    (setq visual-fill-column-extra-text-width '(22 . 22))
     ;; reset the buffer to make changes visible
     (set-window-buffer nil (current-buffer))
     ))
-
-(after! org
+  (add-hook! org-mode-hook (my/org-enable-margins))
   (setq org-insert-heading-respect-content nil)
   (setq org-hide-emphasis-markers t)
    ;; Org Agenda: Store file names in list and add files with org-agenda-file-to-front
@@ -970,6 +1005,8 @@ Allows wrapping quotes, too."
   (setq org-pretty-entities-include-sub-superscripts t)
   (setq org-ellipsis "  ") ;; folding symbol
   (setq org-bullets-bullet-list '(" ")) ; No bullets
+  (setq org-list-demote-modify-bullet; cycle list-bullets when demoting plaintext lists
+       '(("+" . "-") ("-" . "+") ("*" . "+")))
   (setq org-M-RET-may-split-line t) ; allow to split org headings with M-RET
   (setq org-ctrl-k-protect-subtree t) ; do not kill hidden subtress with C-k
   (setq org-todo-keywords
@@ -995,7 +1032,6 @@ Allows wrapping quotes, too."
   (add-hook! org-mode (hl-line-mode 0)) ; turn off hl-line in org mode
   (add-hook! org-mode (display-line-numbers-mode 0))
   ;; (add-hook! org-mode (electric-indent-local-mode -1))
-  (add-hook! org-mode my/org-enable-margins)
   ;; (add-hook! org-mode 'turn-off-solaire-mode)
   ;; Let org commands work with point on any of the leading asterisks
   (setq org-use-speed-commands
@@ -1011,7 +1047,7 @@ Allows wrapping quotes, too."
   :after org
   :init
   (add-hook! 'org-mode-hook (lambda () (org-bullets-mode 1)))
-  )
+  (add-hook! 'org-journal-mode-hook (lambda () (org-bullets-mode 1))))
 
 
 (use-package! org-journal
@@ -1023,10 +1059,11 @@ Allows wrapping quotes, too."
       (map!
        "C-c r j" #'org-journal-new-entry
        "C-c r J" #'org-journal-new-date-entry
+       "C-c r C-j" #'my/org-journal-new-entry-other-buffer
        "C-c r w" #'my/thesis-word-count
        )
-      :custom
       (setq org-extend-today-until 3) ; include entries before 3AM in previous day
+      :custom
       (org-journal-dir (concat org_roam_dir "/journal/"))
       (org-journal-date-prefix "#+TITLE: ")
       (org-journal-file-format "%Y-%m-%d.org")
@@ -1103,13 +1140,19 @@ Allows wrapping quotes, too."
   :diminish
   :config
   (setq org-roam-capture-templates
-        '(
-          ("d" "default" plain (function org-roam--capture-get-point)
+        ;; ;; For Roam V2
+        ;; '(("d" "default" plain "%?"
+        ;;    :if-new
+        ;;    (file+head "%<%Y-%m-%d>_${slug}.org"
+        ;;               "#+TITLE: ${title}\n#+DATE: %<%Y-%m-%d>\n#+LASTMOD: \n\n")
+        ;;    :immediate-finish t)))
+          ;; From Roam V1
+          '(("d" "default" plain (function org-roam--capture-get-point)
            :file-name "%<%Y-%m-%d>_${slug}"
            ;; :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}"
            :head "#+TITLE: ${title}\n#+ROAM_KEY: %<%Y-%m-%d>_${slug}\n\n"
            "%?"
-           :unnarrowed t)
+           :unnarrowed t)))
           ;; Possible way to separate some roam files for Agenda inclusion:
           ;; ("a" "agenda" plain (function org-roam--capture-get-point)
           ;;  :file-name "agenda/%<%Y-%m-%d>_${slug}"
@@ -1117,13 +1160,20 @@ Allows wrapping quotes, too."
           ;;  :head "#+TITLE: ${title}\n#+ROAM_KEY: %<%Y-%m-%d>_${slug}\n\n"
           ;;  "%?"
           ;;  :unnarrowed t)
-          ))
+          ;; ))
   (setq +org-roam-open-buffer-on-find-file nil) ; inhibit roam buffer
+  (setq org-roam-db-update-method 'immediate) ; seems to work better on windows bc of problems with async processes
+  ;; (setq org-roam-db-update-idle-seconds  30) ; fewer db-updates
   :init
-  (map! "C-c r t" #'org-roam-buffer-toggle-display
-        "C-c r f" #'org-roam-find-file
+  (map!
+        "C-c r t" #'org-roam-buffer-toggle-display
         "C-c r b" #'org-roam-buffer-toggle-display
+        "C-c r f" #'org-roam-find-file
         "C-c r i" #'org-roam-insert
+        ;; "C-c r f" #'org-roam-node-find
+        ;; "C-c r t" #'org-roam-buffer-toggle
+        ;; "C-c r b" #'org-roam-buffer-toggle
+        ;; "C-c r i" #'org-roam-node-insert
         "C-c r c" #'org-roam-capture
         "C-c r g" #'org-open-at-point
         "C-c r r" #'org-roam-find-ref
@@ -1316,6 +1366,7 @@ except for programming modes (see `variable-pitch-mode')."
   ("C-c O" . my/olivetti-off)
   )
 
+;; (add-hook! 'text-mode-hook (my/olivetti-on)) ; seems to kill the startup?
   ;; (add-hook! text-mode-hook #'prot/olivetti-mode)
   ;; (add-hook! 'olivetti-mode-hook '(lambda() (redraw-frame)))
   ;; (add-hook! 'olivetti-mode-hook #'prot/scroll-centre-cursor-mode)
