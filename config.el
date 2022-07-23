@@ -265,6 +265,7 @@
 ;;;;; Small global adjustments
 (setq delete-by-moving-to-trash t)      ; Use system recycle bin
 (setq auto-save-default t)
+( auto-save-visited-mode)
 (setq auto-save-visited-file-name t)
 (setq bookmarks-save-flag 1) ; save bookmarks as they are created
 (after! gcmh
@@ -339,7 +340,10 @@
 (add-hook! 'text-mode-hook #'beacon-mode)
 (setq beacon-blink-delay 0.2)
 (setq beacon-blink-duration 0.2)
-(setq company-idle-delay 0.5)
+(after! company
+  (setq company-global-modes '(not org-journal-mode erc-mode circe-mode message-mode help-mode gud-mode vterm-mode))
+  (setq company-idle-delay 0.5)
+  )
 ;; (add-hook! 'writeroom-mode-hook (lambda () (text-scale-adjust 0)))
 ; Try disabling for olivetti DEBUG
 ;; (add-hook! 'visual-line-mode-hook #'visual-fill-column-mode)
@@ -492,6 +496,7 @@
       ;; "C-z"       #'undo-tree-undo
       ;; "C-k"       #'kill-whole-line
       "C-c Q"   #'doom/delete-this-file
+      "C-c f q"   #'my/unfill-region
       "C-k"       #'my/kill-line
       "C-z"       #'undo-fu-only-undo
       "M-w"       #'clipboard-kill-ring-save ;make copy available in clipboard
@@ -523,6 +528,10 @@
       "C-x <SPC>" #'other-window
       "C-x <up>" #'enlarge-window-horizontally
       "C-x <down>" #'shrink-window-horizontally
+      "C-x <right>" #'windmove-right
+      "C-x C-<right>" #'windmove-right
+      "C-x <left>" #'windmove-left
+      "C-x C-<left>" #'windmove-left
       ;; "C-<"       #'previous-buffer
       "C-<tab>"       #'previous-buffer
       ;; "C->"       #'next-buffer
@@ -532,8 +541,10 @@
       "C-x C-r" #'counsel-recentf
       ;; "<f9>" #'writeroom-mode
       "C-c m b" #'my/html-recording-button-wrap
+      ;; Hippie expand offers better completion for e.g. paths and filenames
+      "C-c h" #'hippie-expand
+      "M-#" #'hippie-expand
       )
-
 
 ;; TODO Rebind to local maps
 ;; syntax example:
@@ -774,6 +785,9 @@
 (after! reftex
   (setq reftex-toc-split-windows-fraction 0.2)
   (setq reftex-toc-split-windows-horizontally t)
+  (setq reftex-auto-recenter-toc 'frame)
+  (setq reftex-idle-time 0.5) ; default 1.2
+  ;; (setq reftex-toc-auto-recenter-timer ) ; find a better setting for this variable
   (add-hook! 'text-mode-hook #'hl-todo-mode)
   (add-hook! 'reftex-toc-mode-hook #'org-indent-mode #'visual-line-mode)
   )
@@ -882,12 +896,38 @@ Allows wrapping quotes, too."
   )
 
 ;; Try to remove a bug with smartparens in auctex: wrong translation of insert-quotes when using in comment environemnts
+(use-package! smartparens
+  :config
+    (map!
+   "M-K" #'sp-kill-sexp
+   "M-D" #'sp-unwrap-sexp
+   "M-F" #'sp-forward-sexp
+   "C-c s b" #'sp-forward-barf-sexp
+   "C-c s C-b" #'sp-backward-barf-sexp
+   "C-c s s" #'sp-forward-slurp-sexp
+   "C-c s C-s" #'sp-backward-slurp-sexp
+   "C-c s k" #'sp-kill-sexp
+   "C-c s d" #'sp-unwrap-sexp
+   "C-c s C-d" #'sp-backward-unwrap-sexp
+   "C-c s 8" #'sp-wrap-round
+   "C-c s (" #'sp-wrap-round
+   "C-c s r" #'sp-wrap-round
+   "C-c s 7" #'sp-wrap-curly
+   "C-c s {" #'sp-wrap-curly
+   "C-c s c" #'sp-wrap-curly
+   "C-c s +" #'sp-wrap-square
+   "C-c s ü" #'sp-wrap-square
+   "C-c s a" #'sp-wrap-square
+  ))
+
+
 (use-package! smartparens-latex
   :after latex-extra
-  )
+)
   ;; :config
   ;; (sp-pair "``" "''" nil :actions :rem)
 ;; (sp-pair "``" nil :actions :rem)
+
 ;; ==========
 ;;  FLYSPELL
 ;; ==========
@@ -1340,7 +1380,12 @@ except for programming modes (see `variable-pitch-mode')."
       (prot/scroll-centre-cursor-mode 1)
       (display-line-numbers-mode -1)
       ;; (setq olivetti-body-width 0.5)
-      (setq olivetti-body-width 30)
+      (prog-mode-p)
+      (if (derived-mode-p #'prog-mode)
+          (setq olivetti-body-width 80); for programming modes (monospace)
+          (setq olivetti-body-width 30); otherwise (variable-pitch mode)
+          )
+      ;; (setq olivetti-body-width 30)
       ;; (beacon-mode 0)
       (org-bullets-mode 1) ; hide bullets
       (redraw-frame (selected-frame))
@@ -1376,16 +1421,21 @@ except for programming modes (see `variable-pitch-mode')."
 ;; PYTHON
 ;; ====================
 
+
+
+;; ;; Alternative to LSP-mode: elpy
 ;; set local key: C-c g to +lookup/definition
-(use-package! elpy
-  :defer t
-  :init
-  (advice-add 'python-mode :before 'elpy-enable))
+;; (use-package! elpy
+;;   :defer t
+;;   :init
+;;   (advice-add 'python-mode :before 'elpy-enable))
 
 (map! :map python-mode-map
       "C-c g"    #'+lookup/definition
-      "<C-up>"   #'move-line-up
-      "<C-down>" #'move-line-down
+      ;; "<C-up>"   #'move-line-up
+      "<M-up>"   #'move-line-up
+      ;; "<C-down>" #'move-line-down
+      "<M-down>" #'move-line-down
       )
 
 ;; ====================
