@@ -3,26 +3,6 @@
 
 ;; Self-defined
 
-(defun my/format-region/pdf-paste-to-latex-kill-numbers (beg end)
-"Reformat a text region for use in LaTeX.
-Moves line breaks to sentence ends.
-Strips numbers up to 3 digits."
-(interactive "*r")
-(save-restriction
-    (narrow-to-region beg end)
-    (save-excursion
-      (dolist (regsub (list '("\n" " ")
-                            '("[.] " ".\n")
-                            '("[?] " "?\n")
-                            '("[!] " "!\n")
-                            '(" [[({]?[0-9][0-9]?[0-9]?[])}]? " " ") ; replace numbers, 1-3 digits, alone or in bracket
-                            ))
-        (goto-char (point-min))
-                   (while (search-forward-regexp (nth 0 regsub) nil t)
-                     (replace-match (nth 1 regsub) nil nil))))))
-
-
-
 (defun my/format-region/un-hyphenate (beg end)
 "Reformat a text region for use in LaTeX.
 Moves line breaks to sentence ends.
@@ -36,7 +16,6 @@ Strips numbers up to 3 digits."
         (goto-char (point-min))
                    (while (search-forward-regexp (nth 0 regsub) nil t)
                      (replace-match (nth 1 regsub) nil nil))))))
-
 
 
 (defun my/format-region/kill-numbers (beg end)
@@ -54,13 +33,6 @@ Strips numbers up to 3 digits."
                      (replace-match (nth 1 regsub) nil nil))))))
 
 
-
-
-
-
-
-
-
 (defun my/format-region/pdf-paste-to-latex (beg end)
 "Reformat a text region for use in LaTeX.
 Moves line breaks to sentence ends.
@@ -69,7 +41,7 @@ Strips numbers up to 3 digits."
 (save-restriction
     (narrow-to-region beg end)
     (save-excursion
-      (dolist (regsub (list '("\n" " ")
+      (dolist (regsub (list '("[-]?\n" " ") ;newlines to spaces; remove hyphen if present
                             '("[.] " ".\n")
                             '("[?] " "?\n")
                             '("[!] " "!\n")
@@ -79,8 +51,23 @@ Strips numbers up to 3 digits."
                      (replace-match (nth 1 regsub) nil nil))))))
 
 
-
-
+(defun my/format-region/pdf-paste-to-latex-kill-numbers (beg end)
+"Reformat a text region for use in LaTeX.
+Moves line breaks to sentence ends.
+Strips numbers up to 3 digits."
+(interactive "*r")
+(save-restriction
+    (narrow-to-region beg end)
+    (save-excursion
+      (dolist (regsub (list '("[-]?\n" " ") ;newlines to spaces; remove hyphen if present
+                            '("[.] " ".\n")
+                            '("[?] " "?\n")
+                            '("[!] " "!\n")
+                            '(" [[({]?[0-9][0-9]?[0-9]?[])}]? " " ") ; replace numbers, 1-3 digits, alone or in bracket
+                            ))
+        (goto-char (point-min))
+                   (while (search-forward-regexp (nth 0 regsub) nil t)
+                     (replace-match (nth 1 regsub) nil nil))))))
 
 ;; stack overflow snippets
 
