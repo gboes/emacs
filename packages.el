@@ -49,6 +49,9 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
+;; for upgrade to Org-Roam V2
+;; (unpin! org-roam company-org-roam)
+
 ;; (package! pdf-tools)
 (package! maxframe)
 (package! visual-fill-column)
@@ -57,6 +60,8 @@
 (package! ivy-bibtex)
 (package! org-roam-bibtex)
 (package! org-journal)
+
+
 (package! latex-extra)
 (package! expand-region)
 (package! magit)
@@ -79,3 +84,4 @@
 (package! esup) ; profiler for emacs startup time
 (package! benchmark-init)
 (package! atomic-chrome) ; Connect Emacs to Text Windows in Browsers - Firefox supported via "GhostText"
+(package! deadgrep) ; use ripgrep from emacs, instead of gnu grep

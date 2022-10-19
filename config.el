@@ -132,6 +132,12 @@
 ;;   )
 
 
+;; (after! hl-line         
+;; (set-face-attribute 'solaire-hl-line-face nil
+;;                     :foreground nil
+;;                     :background  "#121212"))
+
+
 
 
 (defun my/theme-toggle ()
@@ -170,6 +176,11 @@
 (load-theme 'doom-solarized-light t)
 (disable-theme 'doom-solarized-light)
 (load-theme 'doom-gruvbox t)
+;; (after! hl-line-mode
+;;   (set-face-attribute 'hl-line nil
+;;                       :foreground nil
+;;                       :background  "#121212"))
+
 (after! org
   (setq org-priority-faces
         '((65 . error)
@@ -222,10 +233,10 @@
   :config
   (setq mixed-pitch-set-height t))
 ; better visible active line default:#F2E6CE
-
-;; (set-face-attribute 'hl-line nil
+;; (after! hl-line 
+;;   (set-face-attribute 'hl-line nil
 ;;                       :foreground nil
-;;                       :background  "#000000")
+;;                       :background  "#121212"))
 
 
 ;; If you use `org' and don't want your org files in the default location below,
@@ -264,9 +275,11 @@
 
 ;;;;; Small global adjustments
 (setq delete-by-moving-to-trash t)      ; Use system recycle bin
+(setq trash-directory "~/.trash/")
 (setq auto-save-default t)
-( auto-save-visited-mode)
-(setq auto-save-visited-file-name t)
+(auto-save-mode)
+;; (auto-save-visited-mode)
+;; (setq auto-save-visited-file-name t)
 (setq bookmarks-save-flag 1) ; save bookmarks as they are created
 (after! gcmh
   ;; (setq gcmh-high-cons-threshold 67108864) ; 64MB garb. coll.
@@ -487,16 +500,20 @@
     (if (sp-point-in-blank-line)
         (comment-dwim ())
       (comment-line ()))))
-(load "~/.doom.d/defuns/move-text.el")
-(load "~/.doom.d/defuns/unfill-region.el")
+(load! "~/.doom.d/defuns/move-text.el")
+(load! "~/.doom.d/defuns/format-region.el")
 
 ;; ;; global keybindings
 (map! "C-1"       #'my/comment-line ; quick comment toggle
       ;; "C-c r"     #'eval-region
       ;; "C-z"       #'undo-tree-undo
       ;; "C-k"       #'kill-whole-line
+      "C-c C-s" #'counsel-rg
+      "C-c s g" #'counsel-rg
       "C-c Q"   #'doom/delete-this-file
-      "C-c f q"   #'my/unfill-region
+      "C-c f q"   #'my/format-region/unfill
+      "C-c q p"   #'my/format-region/pdf-paste-to-latex
+      "C-c q P"   #'my/format-region/pdf-paste-to-latex-kill-numbers
       "C-k"       #'my/kill-line
       "C-z"       #'undo-fu-only-undo
       "M-w"       #'clipboard-kill-ring-save ;make copy available in clipboard
@@ -523,7 +540,7 @@
       "C-<"       #'er/expand-region ;could be freed for someting else. Search and replace?
       "C-c C--"         (lambda () (interactive) (er/expand-region -1))
       ;; window management
-      "C-x w"     #'kill-this-buffer
+      "C-x w"     #'kill-current-buffer
       "C-x W"     #'my/kill-other-buffer
       "C-x <SPC>" #'other-window
       "C-x <up>" #'enlarge-window-horizontally
@@ -545,6 +562,7 @@
       "C-c h" #'hippie-expand
       "M-#" #'hippie-expand
       )
+
 
 ;; TODO Rebind to local maps
 ;; syntax example:
@@ -580,6 +598,7 @@
             ("REVIEW"     warning bold)
             ("SUGGESTION"     success bold)
             ("CITE"     success bold)
+            ("CITATION"     success bold)
             ("cite"     success bold)
             ("NOTE"       success bold)
             ("MAYBE"       warning bold)
@@ -591,6 +610,8 @@
 ;;   :diminish
 ;;   :bind ("C-<" . avy-goto-word-1)
 ;;         ("C-ö" . avy-goto-word-1))
+
+
 
 
 ;; ABBREV-Mode
@@ -616,111 +637,11 @@
   ))
 (put 'my/expand-without-space 'no-self-insert t)
 
-
 ;; ============
 ;; LATEX
 ;; ============
 
-
-(defun my/latex-word-count ()
-  "Run texcount on the current file."
-  (interactive)
-  (display-message-or-buffer
-   (concat "Total word count: "
-    (shell-command-to-string (concat "texcount "
-                       ; " optional arguments "
-                         "-inc "
-                         "-sum "
-                         ;; "-total "
-                         ;; "-brief "
-                         "-0 " ; only a total number as output
-                         "'"
-                         (buffer-file-name)
-                         "'"
-                         )))))
-
-(defun my/thesis-word-count ()
-  "Run texcount on the current file."
-  (interactive)
-  (display-message-or-buffer
-   (concat "Total word count: "
-    (shell-command-to-string (concat "cd /mnt/d/Dropbox/PhD/TeX/ && texcount "
-                       ; " optional arguments "
-                         "-inc "
-                         "-sum "
-                         ;; "-total "
-                         ;; "-brief "
-                         "-0 " ; only a total number as output
-                         "'"
-                         "master.tex "
-                         "'"
-                         )))))
-
-
-
-(defun my/org-latex-word-count ()
-  "Run texcount on the associated file."
-  (interactive)
-  (display-message-or-buffer
-   (concat "Total word count in associated .tex file: "
-    (shell-command-to-string (concat "texcount "
-                       ; " optional arguments "
-                         "-inc "
-                         "-sum "
-                         ;; "-total "
-                         ;; "-brief "
-                         "-0 " ; only a total number as output
-                         "'"
-                         (concat (file-name-sans-extension(
-                                   buffer-file-name)) ".tex")
-                         "'"
-                         )))))
-
-
-;; (defun my/pomodoro-session-start (task)
-;;   "Call the pomodoro utility in the background to log a work session."
-;;   (interactive "sFocus of the next 25 minutes: ")
-;;   (call-process-shell-command (concat "/mnt/d/gdrive/conf/bashutils/pomodoro_CLI.sh  " task "&")
-;;                               nil 0)
-;;   )
-
-
-;; (defun my/pomodoro-session-log (task)
-;;   "Log an elapsed work session without starting a timer."
-;;   (interactive "sFocus of the finished session: ")
-;;   (shell-command (concat "/mnt/d/gdrive/conf/bashutils/pomodoro_CLI.sh --log-only " task "&")
-;;   ))
-
-(defun my/latex-word-count-verbose ()
-  "Run texcount on the current file."
-  (interactive)
-  (display-message-or-buffer
-   (shell-command-to-string (concat "texcount "
-                       ; " optional arguments "
-                         "-inc "
-                         ;; "-total "
-                         ;; "-brief "
-                         (shell-quote-argument buffer-file-name)
-                         ))))
-
-(defun my/push-to-boox ()
-  "Copy current file synchronized location."
-  (interactive)
-  (let ((boox-dir "/mnt/d/gdrive/boox/review/"))
-  (buffer-file-name)
-  (shell-command (concat "cp '"(buffer-file-name) "' " boox-dir ))))
-
-(after! hi-lock-mode
-;; (set-face-background 'hi-yellow "#ebe37c")
-(defun my/highlight-long-sentences (X)
-  "Highlight sentences longer than X words."
-  (interactive "nHighlight sentences longer than:")
-  (setq regex
-        (concat "\([^.?!…‽\"'”’]+ \)\{" (number-to-string X) ",999\}[^.?!…‽\"'”’  ]+[.?!…‽\"'”’]"
-                ))
-  (highlight-regexp regex)
-  )
-)
+(load! "~/.doom.d/defuns/thesis-helpers.el")
 
 (use-package! latex
   ;; :hook
@@ -741,6 +662,9 @@
 (add-hook! 'TeX-update-style-hook 'hl-todo-mode)
 (setq TeX-save-query nil)
 (setq reftex-cite-prompt-optional-args t)
+(map!
+ :map LaTeX-mode-map
+ "C-c C-f" #'TeX-font)
 ;; (add-hook 'LaTeX-mode-hook (lambda () (rainbow-delimiters-mode rainbow-delimiters-mode-disablede-hook (flyspell-lazy-mode)))
 ;; (add-hook! 'LaTeX-mode-hook (lambda () (TeX-fold-mode -1)))
   )
@@ -893,6 +817,9 @@ Allows wrapping quotes, too."
         "<M-S-down>" #'transpose-paragraphs
         "C-c w" #'my/latex-word-count
         )
+  (map!
+ :map reftex-mode-map
+ "C-c C-f" #'TeX-font)
   )
 
 ;; Try to remove a bug with smartparens in auctex: wrong translation of insert-quotes when using in comment environemnts
@@ -1101,6 +1028,7 @@ Allows wrapping quotes, too."
        "C-c r J" #'org-journal-new-date-entry
        "C-c r C-j" #'my/org-journal-new-entry-other-buffer
        "C-c r w" #'my/thesis-word-count
+       "C-c r C-w" #'my/thesis-word-count-insert
        )
       (setq org-extend-today-until 3) ; include entries before 3AM in previous day
       :custom
@@ -1243,6 +1171,8 @@ Allows wrapping quotes, too."
 
 (after! pdf-tools
   :config
+  ;; Automatically refresh changing pdfs
+  (add-hook! PDFView auto-revert-mode)
   ;; more fine-grained zooming
  (setq pdf-view-resize-factor 1.1)
  ;; keyboard shortcuts
@@ -1372,15 +1302,14 @@ except for programming modes (see `variable-pitch-mode')."
       (interactive)
     (olivetti-mode 1)
     (set-window-fringes (selected-window) 0 0)
+    (display-line-numbers-mode -1)
     ;; (variable-pitch-mode 1)
     (redraw-frame (selected-frame))
     (unless (derived-mode-p 'prog-mode)
         ;; What to do if not in a prog mode
       ;; (hide-mode-line-mode 1)
       (prot/scroll-centre-cursor-mode 1)
-      (display-line-numbers-mode -1)
       ;; (setq olivetti-body-width 0.5)
-      (prog-mode-p)
       (if (derived-mode-p #'prog-mode)
           (setq olivetti-body-width 80); for programming modes (monospace)
           (setq olivetti-body-width 30); otherwise (variable-pitch mode)
@@ -1423,6 +1352,8 @@ except for programming modes (see `variable-pitch-mode')."
 
 
 
+; Treat '_' as a word delimiter.
+(add-hook! 'python-mode-hook (modify-syntax-entry ?_ "w"))
 ;; ;; Alternative to LSP-mode: elpy
 ;; set local key: C-c g to +lookup/definition
 ;; (use-package! elpy
@@ -1487,6 +1418,9 @@ except for programming modes (see `variable-pitch-mode')."
 ;; - templates for org-capture
 
 ;; ;; define default article class
+
+;; Beamer shortcuts: shortcut for toggling :noexport: for active section
+
 (after! org
   (add-to-list 'org-latex-classes
                '("kcl-beamer"
