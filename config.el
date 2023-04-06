@@ -8,7 +8,7 @@
 ;;   )
 
 (setq load-prefer-newer t) ; do not load outdated bytecompiled .elc code
-
+(setq native-comp-async-report-warnings-errors nil)
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Gregor Bös"
@@ -35,6 +35,9 @@
 ;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
 ;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
+;; ;; Start Emacs Server
+;; (unless (server-running-p) (server-start))
+
 ;; Multiboot: OS-specific Setups
     (cond ((eq system-type 'windows-nt)
            ;; Windows-specific code goes here.
@@ -43,9 +46,59 @@
            (setq conf-directory "/mnt/d/gdrive/conf/")
            (setq phd-directory "/mnt/d/Dropbox/PhD/TeX/")
            (setq org-directory "/mnt/d/Dropbox/org/"
-                 org_roam_dir (concat org-directory "roam")
-                 )
-           )
+                 org_roam_dir (concat org-directory "roam")))
+
+          ((eq system-type 'darwin)
+           ;; Add path to mactex install
+           (setenv "PATH" (concat (getenv "PATH") ":/Library/TeX/texbin/"))
+           (setq exec-path (append exec-path '("/Library/TeX/texbin/")))
+
+           ;; mac-specific code goes here.
+;           (setq doom-font (font-spec :family "monospace" :size 15 ))
+;          (setq doom-font (font-spec :family "variable-pitch" :size 15 ))
+           (setq doom-variable-pitch-font (font-spec :family "Bembo Std" :size 16 ))
+           ;; (setq doom-variable-pitch-font (font-spec :family "Vollkorn" :size 16 ))
+           ;; (setq doom-variable-pitch-font (font-spec :family "PT Serif" :size 16 ))
+           ;; (setq doom-variable-pitch-font (font-spec :family "Bembo Std" :size 16 ))
+           ;; (setq doom-variable-pitch-font (font-spec :family "Liberation Serif" :size 16 ))
+           (setq doom-font (font-spec :family "Inconsolata" :size 14 ))
+           (setq menu-bar-mode 0)
+           ;; (setq doom-font (font-spec :family "monospace" :size 12 ))
+           (setq doom-unicode-font (font-spec :family "Symbola")) ; fallback for unicode font seems overriden
+           (setq dropbox_dir "~/Dropbox/")
+           (setq gdrive_dir "~/gdrive/")
+           (setq conf-directory "~/gdrive/conf/")
+           (setq phd-directory "~/Dropbox/PhD/TeX/")
+           (setq org-directory "~/Dropbox/org/"
+                 org_roam_dir (concat org-directory "roam/"))
+           (setq
+            ;; ns-control-modifier 'super
+            ;; ns-function-modifier 'hyper
+            ns-command-modifier 'meta
+            ns-option-modifier 'super)
+           (if (version<= emacs-version "28")
+               (progn
+                (setq ns-use-native-fullscreen nil)
+                (setq ns-use-fullscreen-animation nil)
+                (run-at-time "5sec" nil
+                           (lambda ()
+                             (let ((fullscreen (frame-parameter (selected-frame)
+                                                                'fullscreen)))
+                               ;; If emacs has in fullscreen status, maximized
+                               ;; window first, drag from Mac's single space.
+                               (when (memq fullscreen '(fullscreen fullboth))
+                                 (set-frame-parameter (selected-frame)
+                                                      'fullscreen 'maximized))
+                               ;; Manipulating a frame without waiting for the
+                               ;; fullscreen animation to complete can cause a
+                               ;; crash, or other unexpected behavior, on macOS
+                               ;; (bug #28496).
+                               (sleep-for 0.5)
+                               ;; Call `toggle-frame-fullscreen' to fullscreen emacs.
+                               (toggle-frame-fullscreen)))))
+             (progn  ; if emacs>= 29
+               (pixel-scroll-precision-mode))))
+
           ((eq system-type 'gnu/linux)
            ;; Linux-specific code goes here.
            (setq doom-font (font-spec :family "monospace" :size 16 ))
@@ -93,6 +146,9 @@
                (add-hook 'find-file-hook  #'my-open-buffer-as-read-only)
               )))
 
+
+
+
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
@@ -132,7 +188,7 @@
 ;;   )
 
 
-;; (after! hl-line         
+;; (after! hl-line
 ;; (set-face-attribute 'solaire-hl-line-face nil
 ;;                     :foreground nil
 ;;                     :background  "#121212"))
@@ -176,6 +232,16 @@
 (load-theme 'doom-solarized-light t)
 (disable-theme 'doom-solarized-light)
 (load-theme 'doom-gruvbox t)
+
+(defun my/hour-of-day ()
+  "Return hour of day as integer, 24h format"
+  (nth 2 (decode-time (current-time))))
+
+;; Toggle theme on startup if between 0600-1700
+(if (and (> 17 (my/hour-of-day)) (< 5 (my/hour-of-day)))
+    (my/theme-toggle))
+;; should replace explicit theme-references with a theme-name variable
+
 ;; (after! hl-line-mode
 ;;   (set-face-attribute 'hl-line nil
 ;;                       :foreground nil
@@ -233,7 +299,7 @@
   :config
   (setq mixed-pitch-set-height t))
 ; better visible active line default:#F2E6CE
-;; (after! hl-line 
+;; (after! hl-line
 ;;   (set-face-attribute 'hl-line nil
 ;;                       :foreground nil
 ;;                       :background  "#121212"))
@@ -271,8 +337,6 @@
 ;; (add-to-list 'initial-frame-alist '(fullscreen . fullboth))
 (add-to-list 'initial-frame-alist '(fullscreen . fullscreen))
 
-
-
 ;;;;; Small global adjustments
 (setq delete-by-moving-to-trash t)      ; Use system recycle bin
 (setq trash-directory "~/.trash/")
@@ -296,11 +360,11 @@
 (setq-default ispell-personal-dictionary (concat conf-directory ".aspell.en.pws")) ; custom dictionary
 (after! writegood ; don't highlight passive voice
 (writegood-passive-voice-turn-off))
-(setq reftex-default-bibliography '("/mnt/d/Dropbox/org/full_zotbib.bib"))
+(setq reftex-default-bibliography '(concat org-directory "full_zotbib.bib"))
 (setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
-(if (eq initial-window-system 'x)       ; Start in fullscreen
-    (toggle-frame-maximized)
-  (toggle-frame-fullscreen))
+;; (if (eq initial-window-system 'x)       ; Start in fullscreen; but seems buggy in macos
+;;     (toggle-frame-maximized)
+;;   (toggle-frame-fullscreen))
  ; keep whitespace around point (only in buffer, not on disk)
 ;; (add-hook! 'text-mode-hook #'(setq ws-butler-keep-whitespace-before-point t))
 ;; newchange:
@@ -327,18 +391,18 @@
 (setq display-time-24hr-format t)
 
 
-;; (setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode latex-mode)) ; wc-mode can slow things down, I have heard
-;; (setq doom-modeline-enable-word-count 0) ; show word counts in text modes
-;; (global-subword-mode 1) ; word boundaries in CamelCased Words
+(setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode latex-mode)) ; wc-mode can slow things down, I have heard
+(setq doom-modeline-enable-word-count 0) ; show word counts in text modes
+(add-hook! 'prog-mode-hook #'subword-mode) ; word boundaries within in CamelCased Words
 
-;; ; Show wordcount in Org mode.
+; Show wordcount in Org mode.
+  ;; deactivated this custom doom modeline after issues with time display
 ;; (after! doom-modeline
 ;;   (add-to-list 'doom-modeline-continuous-word-count-modes 'org-mode)
-
-;;   (doom-modeline-def-modeline 'main
-;;     ;; we add the word-count segment at the end
-;;     '(bar window-number matches buffer-info remote-host buffer-position selection-info word-count)
-;;     '(objed-state misc-info persp-name irc mu4e github debug input-method buffer-encoding lsp major-mode process vcs checker)))
+  ;; (doom-modeline-def-modeline 'main
+  ;;   ;; we add the word-count segment at the end
+  ;;   '(bar window-number matches buffer-info remote-host buffer-position selection-info word-count)
+  ;;   '(objed-state misc-info persp-name irc mu4e github debug input-method buffer-encoding lsp major-mode process vcs checker)))
 
 ;; Use a bash shell -- conflicts with my/latex-word-count, enables pomodoro utility
 ;; (setq shell-file-name "bash")
@@ -516,6 +580,7 @@
       "C-c q P"   #'my/format-region/pdf-paste-to-latex-kill-numbers
       "C-k"       #'my/kill-line
       "C-z"       #'undo-fu-only-undo
+      "M-z"       #'undo-fu-only-undo ; consistent key bindings in mac
       "M-w"       #'clipboard-kill-ring-save ;make copy available in clipboard
       "C-S-s"     #'isearch-forward-regexp
       "C-S-r"     #'isearch-backward-regexp
@@ -532,8 +597,8 @@
       "<M-up>"    #'move-text-up
       ;; "<C-down>"  #'move-text-down
       "<M-down>"  #'move-text-down
-      "<M-right>" #'forward-sentence
-      "<M-left>"  #'backward-sentence
+      "<M-right>" #'forward-word ; consistent key bindings in mac
+      "<M-left>"  #'backward-word ; consistent key bindings in mac
       ;; shrinking and expanding regions
       "C-c C-+"       #'er/expand-region
       "C-c x"       #'er/expand-region
@@ -552,6 +617,7 @@
       ;; "C-<"       #'previous-buffer
       "C-<tab>"       #'previous-buffer
       ;; "C->"       #'next-buffer
+      "<C-S-tab>" #'next-buffer
       "<C-S-iso-lefttab>" #'next-buffer
       "C-x <C-SPC>" #'ivy-switch-buffer-other-window
       ;; "<S-f11>"   #'toggle-frame-maximized
@@ -589,8 +655,8 @@
   :init
   (setq hl-todo-highlight-punctuation ":"
       hl-todo-keyword-faces
-          `(("TODO"       font-lock-keyword-face warning bold)
-            ("CRITICAL"       error bold italic)
+          `(("TODO"       warning bold)
+            ("CRITICAL"       error bold)
             ("FIXME"      error bold)
             ("DEBUG"      error bold)
             ("IMPORTANT"      error bold italic)
@@ -599,6 +665,7 @@
             ("SUGGESTION"     success bold)
             ("CITE"     success bold)
             ("CITATION"     success bold)
+            ("citation"     success bold)
             ("cite"     success bold)
             ("NOTE"       success bold)
             ("MAYBE"       warning bold)
@@ -622,7 +689,7 @@
   ;; :hook
   ;; ((org-mode text-mode) . abbrev-mode)
   :config
-  (setq abbrev-file-name (expand-file-name "abbrev.el" doom-private-dir))
+  (setq abbrev-file-name (expand-file-name "abbrev.el" doom-user-dir))
   (setq save-abbrevs 'silently)
   (map! "C-x a a" #'edit-abbrevs))
 
@@ -642,6 +709,7 @@
 ;; ============
 
 (load! "~/.doom.d/defuns/thesis-helpers.el")
+
 
 (use-package! latex
   ;; :hook
@@ -730,8 +798,6 @@
   (reftex-toc)
   (reftex-toc-rescan)
   )
-
-
 
 
 (defun my/TeX-insert-quote ()
@@ -866,6 +932,8 @@ Allows wrapping quotes, too."
 ;;   (interactive)
 ;;   )
 
+
+
 ;; (defun my/org-latex-standalone-export
 ;;     "Export an org buffer into a standalone latex class (allows for inclusion into other files or standalone compilation)"
 ;;   (interactive)
@@ -926,7 +994,8 @@ Allows wrapping quotes, too."
    :map org-mode-map
    "C-c f C-e" #'(lambda() (interactive) (org-emphasize ?/))
    "C-c f e" #'(lambda() (interactive) (org-emphasize ?/))
-   "C-i" #'(lambda() (interactive) (org-emphasize ?/))
+   ;; "C-i" #'(lambda() (interactive) (org-emphasize ?/))
+   "<tab>" #'org-cycle
    "C-c f C-b" #'(lambda() (interactive) (org-emphasize ?*))
    "C-c f b" #'(lambda() (interactive) (org-emphasize ?*))
    ;; "C-b" #'(lambda() (interactive) (org-emphasize ?*)) ; Clashes with a navigation command
@@ -935,6 +1004,7 @@ Allows wrapping quotes, too."
    "C-c f n" #'(lambda() (interactive) (org-emphasize ? ))
    "C-c e c" #'org-icalendar-export-to-ics
    "C-c t" #'counsel-org-goto ; similar to ToC command in auctex
+   "C-c c" #'org-cite-insert;
    "C-c C-t" #'counsel-org-goto
    "<f8>" #'(lambda ()(interactive); repeat last org-export
                (let ((current-prefix-arg '(4))) ; simulate universal prefix argument C-u
@@ -964,7 +1034,7 @@ Allows wrapping quotes, too."
   (setq org-insert-heading-respect-content nil)
   (setq org-hide-emphasis-markers t)
    ;; Org Agenda: Store file names in list and add files with org-agenda-file-to-front
-  (setq org-agenda-files "/mnt/d/Dropbox/org/agenda-file-list.org")
+  (setq org-agenda-files (concat org-directory "agenda-file-list.org"))
   ;; would be better: construct file names from list + environment variables (org-path!)
   ;; Some good regex-based solutions here:
   ;; https://stackoverflow.com/questions/11384516/how-to-make-all-org-files-under-a-folder-added-in-agenda-list-automatically?rq=1
@@ -972,6 +1042,7 @@ Allows wrapping quotes, too."
   (setq org-pretty-entities-include-sub-superscripts t)
   (setq org-ellipsis "  ") ;; folding symbol
   (setq org-bullets-bullet-list '(" ")) ; No bullets
+  (setq org-cite-global-bibliography (list (concat (expand-file-name org-directory) "full_zotbib_mac.bib")))
   (setq org-list-demote-modify-bullet; cycle list-bullets when demoting plaintext lists
        '(("+" . "-") ("-" . "+") ("*" . "+")))
   (setq org-M-RET-may-split-line t) ; allow to split org headings with M-RET
@@ -996,7 +1067,7 @@ Allows wrapping quotes, too."
                                    ("application" . ?n)))
   (setq org-clock-persist 'history)
   (org-clock-persistence-insinuate)
-  (add-hook! org-mode (hl-line-mode 0)) ; turn off hl-line in org mode
+  ;; (add-hook! org-mode (hl-line-mode 0)) ; turn off hl-line in org mode
   (add-hook! org-mode (display-line-numbers-mode 0))
   ;; (add-hook! org-mode (electric-indent-local-mode -1))
   ;; (add-hook! org-mode 'turn-off-solaire-mode)
@@ -1015,6 +1086,15 @@ Allows wrapping quotes, too."
   :init
   (add-hook! 'org-mode-hook (lambda () (org-bullets-mode 1)))
   (add-hook! 'org-journal-mode-hook (lambda () (org-bullets-mode 1))))
+
+;;;;; org-download: support image drag and drop and image pasting from clipboard
+
+(use-package! org-download
+  :init
+  (cond ((eq system-type 'windows-nt)
+         (setq org-download-screenshot-method "convert clipboard: %s"))
+        ((eq system-type 'darwin)
+         (setq org-download-screenshot-method "screencapture -i %s"))))
 
 
 (use-package! org-journal
@@ -1260,8 +1340,8 @@ Allows wrapping quotes, too."
   :diminish
   :config
   ;; (setq olivetti-body-width 0.5)
-  (setq olivetti-body-width 30)
-  (setq olivetti-minimum-body-width 25) ; should try to enlarge proportional fonts instead
+  (setq olivetti-body-width 50)
+  (setq olivetti-minimum-body-width 30) ; should try to enlarge proportional fonts instead
   (setq olivetti-recall-visual-line-mode-entry-state t)
 
   (define-minor-mode prot/olivetti-mode
@@ -1312,7 +1392,7 @@ except for programming modes (see `variable-pitch-mode')."
       ;; (setq olivetti-body-width 0.5)
       (if (derived-mode-p #'prog-mode)
           (setq olivetti-body-width 80); for programming modes (monospace)
-          (setq olivetti-body-width 30); otherwise (variable-pitch mode)
+          (setq olivetti-body-width 50); otherwise (variable-pitch mode)
           )
       ;; (setq olivetti-body-width 30)
       ;; (beacon-mode 0)
@@ -1369,6 +1449,35 @@ except for programming modes (see `variable-pitch-mode')."
       "<M-down>" #'move-line-down
       )
 
+
+;; ====================
+;; Firefox Edit Server
+;; ====================
+
+;; (run-with-idle-timer 5 nil (lambda () (progn
+;;                                         (add-to-list 'load-path "~/.doom.d/defuns")
+;;                                         (require 'edit-server)
+;;                                         (edit-server-start))))
+
+
+(use-package! edit-server
+  :ensure t
+  :commands edit-server-start
+  :init (if after-init-time
+              (edit-server-start)
+            (add-hook 'after-init-hook
+                      #'(lambda() (edit-server-start))))
+  :config (setq edit-server-new-frame-alist
+                '((name . "Edit with Emacs FRAME")
+                  (top . 200)
+                  (left . 200)
+                  (width . 80)
+                  (height . 25)
+                  (minibuffer . t)
+                  (menu-bar-lines . t)
+                  ;; (window-system . x)
+                  )))
+
 ;; ====================
 ;; TRAMP Remote Editing
 ;; ====================
@@ -1421,6 +1530,8 @@ except for programming modes (see `variable-pitch-mode')."
 
 ;; Beamer shortcuts: shortcut for toggling :noexport: for active section
 
+
+;; expand and separate into defuns file
 (after! org
   (add-to-list 'org-latex-classes
                '("kcl-beamer"

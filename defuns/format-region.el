@@ -41,7 +41,8 @@ Strips numbers up to 3 digits."
 (save-restriction
     (narrow-to-region beg end)
     (save-excursion
-      (dolist (regsub (list '("[-]?\n" " ") ;newlines to spaces; remove hyphen if present
+      (dolist (regsub (list '("[-]\n" "") ;remove breaking hyphens
+                            '("\n" " ") ;newlines to spaces
                             '("[.] " ".\n")
                             '("[?] " "?\n")
                             '("[!] " "!\n")
@@ -59,15 +60,32 @@ Strips numbers up to 3 digits."
 (save-restriction
     (narrow-to-region beg end)
     (save-excursion
-      (dolist (regsub (list '("[-]?\n" " ") ;newlines to spaces; remove hyphen if present
+      (dolist (regsub (list '("[-]\n" "") ;remove breaking hyphens
+                            '("\n" " ") ;newlines to spaces
                             '("[.] " ".\n")
                             '("[?] " "?\n")
                             '("[!] " "!\n")
+                            '("[“\"„]\\<" "``") ; TeX opening quotation marks
+                            '(" [“\"„]" " ``") ;
+                            '(" [']" " `") ;
+                            '("\\>[\"”“]" "''") ; TeX closing quotation marks
+                            '("[\"”“] " "'' ")
+                            '("['] " "' ")
                             '(" [[({]?[0-9][0-9]?[0-9]?[])}]? " " ") ; replace numbers, 1-3 digits, alone or in bracket
                             ))
         (goto-char (point-min))
                    (while (search-forward-regexp (nth 0 regsub) nil t)
                      (replace-match (nth 1 regsub) nil nil))))))
+
+(defun my/unspace-region ()
+  "Delete all spaces in region."
+  ; Should expand to paragraph, or current line, if no region is active
+  (interactive)
+  (save-restriction
+    (narrow-to-region (point) (mark))
+    (goto-char (point-min))
+    (while (search-forward " " nil t) (replace-match "" nil t))))
+
 
 ;; stack overflow snippets
 

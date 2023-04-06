@@ -14,9 +14,9 @@
 ;;      Alternatively, press 'gd' (or 'C-c g d') on a module to browse its
 ;;      directory (for easy access to its source code).
 
-(when doom-debug-p
-  (require 'benchmark-init)
-  (add-hook 'doom-first-input-hook #'benchmark-init/deactivate))
+;; (when doom-debug-p
+;;  (require 'benchmark-init)
+;;  (add-hook 'doom-first-input-hook #'benchmark-init/deactivate))
 
 (doom! :input
        ;;chinese
@@ -149,7 +149,7 @@
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-       (org +roam +journal +jupyter) ; interesting flags to add:pomodoro, pandoc, noter,
+       (org +roam +journal +jupyter +pandoc) ; interesting flags to add:pomodoro, pandoc, noter,
                            ; organize your plain life in plain text
        ;;perl              ; write code no one else can comprehend
        ;;php               ; perl's insecure younger brother

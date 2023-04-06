@@ -60,8 +60,11 @@
 (package! ivy-bibtex)
 (package! org-roam-bibtex)
 (package! org-journal)
-
-
+(package! org-download)
+(package! edit-server)
+(package! exwm)
+(package! ox-pandoc) ; enable pandoc powered eports for org files
+(package! lsp-grammarly) ; correcting grammar in normal buffers!
 (package! latex-extra)
 (package! expand-region)
 (package! magit)

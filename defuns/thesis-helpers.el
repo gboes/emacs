@@ -19,7 +19,6 @@
 ;;
 ;;; Code:
 
-
 (defun my/latex-word-count ()
   "Run texcount on the current file."
   (interactive)
@@ -118,11 +117,12 @@
                          (shell-quote-argument buffer-file-name)
                          ))))
 
+
+
 (defun my/push-to-boox ()
   "Copy current file synchronized location."
   (interactive)
-  (let ((boox-dir "/mnt/d/gdrive/boox/review/"))
-  (buffer-file-name)
+  (let ((boox-dir (concat gdrive_dir "boox/review/"))) ;let expects a varlist, hence two starting braces
   (shell-command (concat "cp '"(buffer-file-name) "' " boox-dir ))))
 
 
@@ -134,9 +134,7 @@
   (setq regex
         (concat "\([^.?!…‽\"'”’]+ \)\{" (number-to-string X) ",999\}[^.?!…‽\"'”’  ]+[.?!…‽\"'”’]"
                 ))
-  (highlight-regexp regex)
-  )
-)
+  (highlight-regexp regex)))
 
 (provide 'thesis-helpers)
 ;;; thesis-helpers.el ends here

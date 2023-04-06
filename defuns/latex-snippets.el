@@ -67,6 +67,19 @@
 ;;              close-quote))))))
 
 
+(defun my/org-latex-export-compile-continuous ()
+    "Start continuous latexmk_process in the background."
+  (interactive)
+  (async-shell-command (concat "latexmk -pdf -view=none -pvc -silent " (file-name-base) ".tex")
+                               ;; Second argument: name of buffer for output
+                               (concat "*latexmk messages " (file-name-base) "*")))
+
+;; Inhibit output from async shell call to latexmk
+(add-to-list 'display-buffer-alist
+             '(".latexmk messages .*" display-buffer-no-window))
+
+
+
 (defun my/TeX-insert-single-quote ()
   "Insert a normal quote if in comment-environment.
 
