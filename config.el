@@ -38,6 +38,30 @@
 ;; ;; Start Emacs Server
 ;; (unless (server-running-p) (server-start))
 
+;; emacsclient buffers (e.g. $EDITOR from Claude Code): finish with C-c C-c, abort with C-c C-k
+(defun my/server-edit-save ()
+  "Save the buffer, then finish the emacsclient session without prompting."
+  (interactive)
+  (save-buffer)
+  (server-edit))
+(define-minor-mode my/server-edit-mode
+  "Finish emacsclient buffers with C-c C-c; abort with C-c C-k."
+  :keymap (define-keymap
+            "C-c C-c" #'my/server-edit-save
+            "C-c C-k" #'server-edit-abort))
+(add-hook 'server-visit-hook #'my/server-edit-mode)
+
+;; On macOS, new emacsclient frames come up without input focus: the app is
+;; activated, but its previous key frame gets the focus. Focusing directly in
+;; the hook is too early, hence the short timer.
+(defun my/server-focus-frame-h ()
+  "Give new emacsclient frames input focus."
+  (let ((frame (selected-frame)))
+    (run-at-time 0.1 nil (lambda ()
+                           (when (frame-live-p frame)
+                             (select-frame-set-input-focus frame))))))
+(add-hook 'server-after-make-frame-hook #'my/server-focus-frame-h 90)
+
 ;; Multiboot: OS-specific Setups
 ;; Might be good to change at some point into loading different files per hardware config.
 ;; e.g.:
