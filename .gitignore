@@ -17,3 +17,5 @@ tmp/
 *.toc
 *.auctex-auto
 *.out
+\#*#
+.#*
