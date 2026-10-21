@@ -517,11 +517,16 @@
 ;;; might deserve their own keybinding
 (defalias 'ts 'transpose-sentences)
 (defalias 'tp 'transpose-paragraphs)
+(after! web (defalias 'my/html-tag-replace 'web-mode-element-rename))
+
 ; hard to remember function name for display magnification
 (defalias 'zoom 'text-scale-adjust)
 
 ;;;;;;;;;; SNIPPETS -- should migrate to ./defuns/
 ;;; definitions for dragging lines up and down
+
+(load! "~/.doom.d/defuns/coding_utilities.el")
+
 (defmacro save-column (&rest body)
   `(let ((column (current-column)))
      (unwind-protect
@@ -616,14 +621,44 @@
       (comment-line ()))))
 (load! "~/.doom.d/defuns/move-text.el")
 (load! "~/.doom.d/defuns/format-region.el")
+(load! "~/.doom.d/defuns/navigation.el")
+
+
+;; Move more quickly
+;; --- should be reformatted as part of the map! command below
+
+(global-set-key (kbd "C-S-n")
+                (lambda ()
+                  (interactive)
+                  (ignore-errors (next-line 5))))
+
+(global-set-key (kbd "C-S-p")
+                (lambda ()
+                  (interactive)
+                  (ignore-errors (previous-line 5))))
+
+(global-set-key (kbd "C-S-f")
+                (lambda ()
+                  (interactive)
+                  (ignore-errors (forward-char 5))))
+
+(global-set-key (kbd "C-S-b")
+                (lambda ()
+                  (interactive)
+                  (ignore-errors (backward-char 5))))
+
 
 ;; ;; global keybindings
 (map! "C-1"       #'my/comment-line ; quick comment toggle
       ;; "C-c r"     #'eval-region
       ;; "C-z"       #'undo-tree-undo
       ;; "C-k"       #'kill-whole-line
-      "C-c C-s" #'counsel-rg
-      "C-c s g" #'counsel-rg
+      "C-%"       #'query-replace
+      "C-x n w"   #'widen
+      "C-c C-s"   #'counsel-grep
+      "C-c C-r"   #'counsel-rg
+      ;; "C-c s g"   #'counsel-git-grep ; conflicting with sp-mode
+      ;; "C-c s s"   #'counsel-shell-history ; conflicting with sp-mode
       "C-c Q"   #'doom/delete-this-file
       "C-c f q"   #'my/format-region/unfill
       "C-c q p"   #'my/format-region/pdf-paste-to-latex
@@ -631,6 +666,7 @@
       "C-k"       #'my/kill-line
       "C-z"       #'undo-fu-only-undo
       "M-z"       #'undo-fu-only-undo ; consistent key bindings in mac
+      "M-Z"       #'undo-fu-only-redo ; consistent key bindings in mac
       "M-w"       #'clipboard-kill-ring-save ;make copy available in clipboard
       "C-S-s"     #'isearch-forward-regexp
       "C-S-r"     #'isearch-backward-regexp
@@ -653,17 +689,23 @@
       "C-c C-+"       #'er/expand-region
       "C-c x"       #'er/expand-region
       "C-<"       #'er/expand-region ;could be freed for someting else. Search and replace?
+      "C-`"       #'er/expand-region ;could be freed for someting else. Search and replace?
+      "C-~"         (lambda () (interactive) (er/expand-region -1))
       "C-c C--"         (lambda () (interactive) (er/expand-region -1))
       ;; window management
       "C-x w"     #'kill-current-buffer
       "C-x W"     #'my/kill-other-buffer
       "C-x <SPC>" #'other-window
+      "M-g m" #'counsel-mark-ring
       "C-x <up>" #'enlarge-window-horizontally
       "C-x <down>" #'shrink-window-horizontally
       "C-x <right>" #'windmove-right
       "C-x C-<right>" #'windmove-right
       "C-x <left>" #'windmove-left
       "C-x C-<left>" #'windmove-left
+      "C-x C-<up>" #'windmove-up
+      "C-x C-<down>" #'windmove-down
+      "C-x C-3" #'my/org-todo-view
       ;; "C-<"       #'previous-buffer
       "C-<tab>"       #'previous-buffer
       ;; "C->"       #'next-buffer
