@@ -39,6 +39,19 @@
 ;; (unless (server-running-p) (server-start))
 
 ;; Multiboot: OS-specific Setups
+;; Might be good to change at some point into loading different files per hardware config.
+;; e.g.:
+;; ;; Settings for currently logged in user
+;; (setq user-settings-dir
+;;       (concat user-emacs-directory "users/" user-login-name))
+
+;; ;; Conclude init by setting up specifics for the current user (when
+;; (file-exists-p user-settings-dir) (mapc 'load (directory-files
+;; user-settings-dir nil "^[^#].*el$"))) Or just keep the conditional and then
+;; refer to separate files for OS-dependent settings (e.g. modifier keys,
+;; themes), and make everything below OS-agnostic. (which might be tricky for key bindings.)
+
+
     (cond ((eq system-type 'windows-nt)
            ;; Windows-specific code goes here.
            (setq doom-font (font-spec :family "monospace" :size 15 ))
@@ -71,6 +84,15 @@
            (setq phd-directory "~/Dropbox/PhD/TeX/")
            (setq org-directory "~/Dropbox/org/"
                  org_roam_dir (concat org-directory "roam/"))
+       ;; delete by moving to trash
+       (setq delete-by-moving-to-trash t)
+       (defun system-move-file-to-trash (file)
+         "Use \"trash\" to move FILE to the system trash.
+        When using Homebrew, install it using \"brew install trash\"."
+         (call-process (executable-find "trash")
+		       nil 0 nil
+		       file))
+       ;; basic keyboard settings for macos
            (setq
             ;; ns-control-modifier 'super
             ;; ns-function-modifier 'hyper
@@ -147,7 +169,13 @@
               )))
 
 
+;; Exclude temporary files for trash
+(setq system-trash-exclude-matches '("#[^/]+#$" ".*~$" "\\.emacs\\.desktop.*"))
+(setq system-trash-exclude-paths '("/tmp"))
 
+;; Avoid accidental yanking from trackpad
+(unbind-key "<mouse-2>")
+(unbind-key "<mouse-3>")
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -339,12 +367,16 @@
 
 ;;;;; Small global adjustments
 (setq delete-by-moving-to-trash t)      ; Use system recycle bin
-(setq trash-directory "~/.trash/")
+(setq mark-ring-max 32)
+(setq trash-directory "~/.Trash/")
+(display-battery-mode)
 (setq auto-save-default t)
+;; (setq display-battery-mode t) ; leads to a bug on startup - lazy-load?
 (auto-save-mode)
 ;; (auto-save-visited-mode)
 ;; (setq auto-save-visited-file-name t)
-(setq bookmarks-save-flag 1) ; save bookmarks as they are created
+(setq bookmark-save-flag 1) ; save bookmarks as they are created
+(setq set-mark-command-repeat-pop 1) ; type C-SPC instead of C-u C-SPC to cycle through the mark ring.
 (after! gcmh
   ;; (setq gcmh-high-cons-threshold 67108864) ; 64MB garb. coll.
   ;; (setq garbage-collection-messages t)
@@ -628,6 +660,25 @@
       "C-c h" #'hippie-expand
       "M-#" #'hippie-expand
       )
+
+;; always save recentf-list when opening a new file
+(add-hook 'find-file-hook 'recentf-save-list)
+(setq recentf-max-saved-items 1000)
+;; ;; Add support for pasting images from clipboard
+;; (use-package org-download
+;;     :after org
+;;     :defer nil
+;;     :custom
+;;     (org-download-method 'directory)
+;;     (org-download-image-dir "images")
+;;     (org-download-heading-lvl nil)
+;;     (org-download-timestamp "%Y%m%d-%H%M%S_")
+;;     (org-image-actual-width 300)
+;;     (org-download-screenshot-method "/usr/local/bin/pngpaste %s")
+;;     :bind
+;;     ("C-M-y" . org-download-screenshot file)
+;;     :config
+;;     (require 'org-download))
 
 
 ;; TODO Rebind to local maps
