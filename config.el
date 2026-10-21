@@ -1087,10 +1087,10 @@ Allows wrapping quotes, too."
 
 
 
-(use-package! org-pdftools
-  :after org
-  :defer
-  :hook (org-load . org-pdftools-setup-link))
+;; (use-package! org-pdftools
+;;   :after org
+;;   :defer
+;;   :hook (org-load . org-pdftools-setup-link))
 
 
 (use-package! org
@@ -1368,7 +1368,10 @@ Allows wrapping quotes, too."
   ;; more fine-grained zooming
  (setq pdf-view-resize-factor 1.1)
  ;; keyboard shortcuts
+  (add-hook! 'pdf-view-mode-hook #'pdf-sync-minor-mode)
  (define-key pdf-view-mode-map (kbd "h") 'pdf-annot-add-highlight-markup-annotation)
+  (define-key pdf-view-mode-map (kbd "M-w") 'pdf-view-kill-ring-save)
+  (define-key pdf-view-mode-map (kbd "M-c") 'pdf-view-kill-ring-save)
  (define-key pdf-view-mode-map (kbd "t") 'pdf-annot-add-text-annotation)
  (define-key pdf-view-mode-map (kbd "D") 'pdf-annot-delete)
  (define-key pdf-view-mode-map (kbd "C-S-p") 'my/push-to-boox))
