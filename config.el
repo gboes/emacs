@@ -1712,6 +1712,23 @@ except for programming modes (see `variable-pitch-mode')."
 
 ;; Beamer shortcuts: shortcut for toggling :noexport: for active section
 
+;; agent-shell (and its dependency acp) load on first use of its autoloaded commands.
+(use-package! agent-shell
+  :defer t)
+
+;; LLM integration through gptel. The commands are autoloaded, so the keys
+;; load gptel on first use.
+(use-package! gptel
+  :defer t
+  :init
+  (map!
+   "C-c G g" #'gptel
+   "C-c G r" #'gptel-rewrite
+   "C-c G s" #'gptel-send)
+  :config
+  ;; (setq! gptel-backend "") ; defaults to ChatGPT
+  ;; (setq! gptel-model "") ; defaults to gpt-4o-mini
+  )
 
 ;; expand and separate into defuns file
 (after! org

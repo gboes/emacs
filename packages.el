@@ -93,7 +93,13 @@
 (package! benchmark-init)
 (package! atomic-chrome) ; Connect Emacs to Text Windows in Browsers - Firefox supported via "GhostText"
 (package! deadgrep) ; use ripgrep from emacs, instead of gnu grep
+(package! gptel) ; llm integration
 (package! wc-mode) ; wordcount writing goals for Stream of consciousness journaling
 ;; (package! ultra-scroll)
 ;; (package! nano-theme) ; Rougier themed emacs
 ;; (package! book-mode) ; Rougier package for styling org mode
+
+;; Agentic LLM coding packages - agent-shell plus dependencies
+(package! shell-maker)
+(package! acp)
+(package! agent-shell)
