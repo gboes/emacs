@@ -1774,3 +1774,9 @@ except for programming modes (see `variable-pitch-mode')."
 ;; ;;   ;; default packages for all latex exports
 ;; ;;   (add-to-list 'org-latex-packages-alist '("" "amsmath"))
 ;; ;; )
+
+;; Claude Code UI glyphs: keep the line height stable (fonts; vterm substitutions)
+(load! "~/.doom.d/defuns/claude-glyphs.el")
+
+;; PgUp/PgDn, M-v and mouse wheel for programs (Claude Code) in vterm
+(load! "~/.doom.d/defuns/vterm-scroll.el")
