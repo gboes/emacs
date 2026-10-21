@@ -1458,7 +1458,7 @@ Allows wrapping quotes, too."
   :diminish
   :config
   ;; (setq olivetti-body-width 0.5)
-  (setq olivetti-body-width 50)
+  (setq olivetti-body-width 60)
   (setq olivetti-minimum-body-width 30) ; should try to enlarge proportional fonts instead
   (setq olivetti-recall-visual-line-mode-entry-state t)
 
@@ -1495,26 +1495,31 @@ except for programming modes (see `variable-pitch-mode')."
       (redraw-frame (selected-frame))
       ))
 
+  :init
+  ;; Defined in :init so that hooks can call them before olivetti is loaded;
+  ;; `olivetti-mode' is autoloaded.
   (defun my/olivetti-on ()
       "Enable writing environment with olivetti & Co."
       (interactive)
     (olivetti-mode 1)
-    (set-window-fringes (selected-window) 0 0)
+    ;; Buffer-local fringes: hooks may run before the buffer is displayed,
+    ;; so `selected-window' is not necessarily the buffer's window.
+    (setq-local left-fringe-width 0 right-fringe-width 0)
+    (dolist (win (get-buffer-window-list nil nil t))
+      (set-window-fringes win 0 0))
     (display-line-numbers-mode -1)
     ;; (variable-pitch-mode 1)
     (redraw-frame (selected-frame))
     (unless (derived-mode-p 'prog-mode)
         ;; What to do if not in a prog mode
       ;; (hide-mode-line-mode 1)
+      ;; Always enable scroll-centre cursor mode
       (prot/scroll-centre-cursor-mode 1)
       ;; (setq olivetti-body-width 0.5)
-      (if (derived-mode-p #'prog-mode)
-          (setq olivetti-body-width 80); for programming modes (monospace)
-          (setq olivetti-body-width 50); otherwise (variable-pitch mode)
-          )
+      (setq olivetti-body-width 60) ; prog modes: see `my/olivetti-prog-width-h'
       ;; (setq olivetti-body-width 30)
       ;; (beacon-mode 0)
-      (org-bullets-mode 1) ; hide bullets
+      ;; (org-bullets-mode 1) ; hide bullets
       (redraw-frame (selected-frame))
       ))
 
@@ -1524,14 +1529,27 @@ except for programming modes (see `variable-pitch-mode')."
       "Disable writing environment with olivetti & Co."
     (interactive)
     (olivetti-mode -1)
-    (set-window-fringes (selected-window) nil) ; Use default width
+    (kill-local-variable 'left-fringe-width)
+    (kill-local-variable 'right-fringe-width)
+    (dolist (win (get-buffer-window-list nil nil t))
+      (set-window-fringes win nil)) ; Use default width
     (hide-mode-line-mode -1)
     (display-line-numbers-mode 1)
-    (setq redraw-frame (selected-frame))
+    (redraw-frame (selected-frame))
     )
 
+  (defun my/olivetti-prog-width-h ()
+    "Use a wider body in programming modes (monospace)."
+    (when (derived-mode-p 'prog-mode)
+      (setq olivetti-body-width 80) ; buffer-local in olivetti
+      (olivetti-set-buffer-windows)))
+  ;; Runs after `olivetti-mode' has set up the windows, so re-apply the width.
+  (add-hook 'olivetti-mode-on-hook #'my/olivetti-prog-width-h)
 
-;; Always enable scroll-centre cursor mode
+  ;; org-mode-hook runs after Doom's text-mode-hook enables line numbers.
+  (add-hook 'org-mode-hook #'my/olivetti-on)
+  ;; emacsclient buffers, e.g. $EDITOR from Claude Code
+  (add-hook 'server-visit-hook #'my/olivetti-on)
 
   ;; :bind ("C-c o" . prot/olivetti-mode)
   :bind ("C-c o" . my/olivetti-on)
