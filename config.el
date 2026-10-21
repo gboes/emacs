@@ -222,7 +222,17 @@
 ;;                     :background  "#121212"))
 
 
+(defun my/revert-pdf-view-buffers ()
+  "Reverts all buffers in `pdf-view-mode`."
+  (interactive)
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (eq major-mode 'pdf-view-mode)
+        (revert-buffer t t t)))))
 
+(use-package! beacon
+  :config
+  (set-face-background 'beacon-fallback-background "#AntiqueWhite2"))
 
 (defun my/theme-toggle ()
   "Toggle between light and dark themes."
@@ -230,14 +240,14 @@
   (if theme-dark
       (progn
         (disable-theme 'doom-gruvbox)
+        (remove-hook 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode)
         ;; (enable-theme 'spacemacs-light)
         ;; (load-theme 'doom-solarized-light t)
         ;; (enable-theme 'doom-solarized-light)
         (enable-theme 'doom-solarized-light)
-        (set-face-background 'beacon-fallback-background "#AntiqueWhite2")
         (setq beacon-color "#fff480")
-
-        (custom-set-faces! '(org-ellipsis :foreground "#c1dbcd")) ; darker ellipsis
+        (custom-set-faces! '(org-ellipsis :foreground "#313bcd")) ; darker ellipsis
+        (my/revert-pdf-view-buffers)
         (setq theme-dark nil))
 ; toggling to dark
     (progn
@@ -245,8 +255,13 @@
       ;; (turn-off-solaire-mode) ; if it's still enabled afterwards
         (condition-case err
             ;; Enable the theme if emacs already has it
+          (progn
             (enable-theme 'doom-gruvbox)
           (setq beacon-color 0.5)
+            (custom-set-faces! '(org-ellipsis :foreground "#b9abcd"))
+            (add-hook! 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode)
+            (my/revert-pdf-view-buffers)
+            )
           ;; Otherwise load it
           (error (load-theme 'doom-gruvbox t)))
        (setq theme-dark t))))
@@ -260,6 +275,9 @@
 (load-theme 'doom-solarized-light t)
 (disable-theme 'doom-solarized-light)
 (load-theme 'doom-gruvbox t)
+(setq theme-dark t)
+(my/theme-toggle)
+
 
 (defun my/hour-of-day ()
   "Return hour of day as integer, 24h format"
