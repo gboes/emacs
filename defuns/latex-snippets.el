@@ -72,8 +72,8 @@
    Can be started from .tex or .org file."
   (interactive)
   (async-shell-command (concat "latexmk -pdf -view=none -pvc -silent " (file-name-base) ".tex")
-                               ;; Second argument: name of buffer for output
-                               (concat "*latexmk messages " (file-name-base) "*")))
+                       ;; Second argument: name of buffer for output
+                       (concat "*latexmk messages " (file-name-base) "*")))
 
 ;; Inhibit output from async shell call to latexmk
 (add-to-list 'display-buffer-alist
