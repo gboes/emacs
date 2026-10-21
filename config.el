@@ -888,6 +888,9 @@ Allows wrapping quotes, too."
  "C-c C-f" #'TeX-font)
   )
 
+;; Address a bug for emacs 29 using a doom emacs mode alias list introduced in emacs 30
+(setq major-mode-remap-alist major-mode-remap-defaults)
+
 ;; Try to remove a bug with smartparens in auctex: wrong translation of insert-quotes when using in comment environemnts
 (use-package! smartparens
   :config

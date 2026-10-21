@@ -58,17 +58,22 @@
 (package! beacon) ; blink cursor when scrolling
 (package! org-ref)
 (package! ivy-bibtex)
+(package! citar)
+(package! quarto-mode)
+;; (package! reformatter)
 (package! org-roam-bibtex)
 (package! org-journal)
 (package! org-download)
 (package! edit-server)
 (package! exwm)
+(package! csv)
+(package! csv-mode)
 (package! ox-pandoc) ; enable pandoc powered eports for org files
 (package! lsp-grammarly) ; correcting grammar in normal buffers!
 (package! latex-extra)
 (package! expand-region)
 (package! magit)
-(when (featurep! :tools magit)
+(when (modulep! :tools magit)
   (package! magit-section))
 (package! zen-mode)
 (package! impatient-mode) ; live html and markdown preview
@@ -88,3 +93,7 @@
 (package! benchmark-init)
 (package! atomic-chrome) ; Connect Emacs to Text Windows in Browsers - Firefox supported via "GhostText"
 (package! deadgrep) ; use ripgrep from emacs, instead of gnu grep
+(package! wc-mode) ; wordcount writing goals for Stream of consciousness journaling
+;; (package! ultra-scroll)
+;; (package! nano-theme) ; Rougier themed emacs
+;; (package! book-mode) ; Rougier package for styling org mode
