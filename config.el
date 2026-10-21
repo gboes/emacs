@@ -771,6 +771,9 @@
             ("DEPRECATED" font-lock-doc-face bold)
             )))
 
+;; (use-package! csv
+;;   :after org)
+
 ;; (use-package! avy
 ;;   :defer t
 ;;   :diminish
@@ -1541,6 +1544,13 @@ except for programming modes (see `variable-pitch-mode')."
   ;; (add-hook! 'olivetti-mode-hook #'prot/scroll-centre-cursor-mode)
   ;; (add-hook! 'prot/olivetti-mode-hook #'(lambda() (display-line-numbers-mode -1)))
 
+
+
+
+;; ====================
+;; CSV mode
+;; ====================
+(add-hook! 'csv-mode-hook (csv-align-mode))
 ;; ====================
 ;; PYTHON
 ;; ====================
