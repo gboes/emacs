@@ -1151,7 +1151,7 @@ Allows wrapping quotes, too."
   ;; https://stackoverflow.com/questions/11384516/how-to-make-all-org-files-under-a-folder-added-in-agenda-list-automatically?rq=1
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.5))
   (setq org-pretty-entities-include-sub-superscripts t)
-  (setq org-ellipsis "  ") ;; folding symbol
+  (setq org-ellipsis " …") ;; folding symbol
   (setq org-bullets-bullet-list '(" ")) ; No bullets
   (setq org-cite-global-bibliography (list (concat (expand-file-name org-directory) "full_zotbib_mac.bib")))
   (setq org-list-demote-modify-bullet; cycle list-bullets when demoting plaintext lists
@@ -1187,8 +1187,8 @@ Allows wrapping quotes, too."
         (lambda ()
           (and (looking-at org-outline-regexp)
                (looking-back "^\**"))))
-  (defalias 'counsel-org-goto 'my/org-jump)
-  (defalias 'counsel-org-goto 'my/org-toc))
+  (defalias 'my/org-jump 'counsel-org-goto)
+  (defalias 'my/org-toc  'counsel-org-goto))
 
 ;;;; org-roam
 
@@ -1242,6 +1242,7 @@ Allows wrapping quotes, too."
 ;; Org-Ref starting slowing things down and I don't really need it
 (use-package! org-ref
     :after org
+  :diminish
     :config
     (setq
          org-ref-completion-library 'org-ref-ivy-cite
@@ -1289,10 +1290,8 @@ Allows wrapping quotes, too."
 
 
 
-
-
-
-
+;; (use-package emacsql-sqlite3)
+;; (setq org-roam-database-connector 'sqlite3)
 
 (use-package! org-roam
   :after org
@@ -1320,6 +1319,8 @@ Allows wrapping quotes, too."
           ;;  "%?"
           ;;  :unnarrowed t)
           ;; ))
+  ;; (setq org-roam-database-connector 'sqlite3)
+  (setq org-roam-database-connector 'sqlite-builtin)
   (setq +org-roam-open-buffer-on-find-file nil) ; inhibit roam buffer
   (setq org-roam-db-update-method 'immediate) ; seems to work better on windows bc of problems with async processes
   ;; (setq org-roam-db-update-idle-seconds  30) ; fewer db-updates
