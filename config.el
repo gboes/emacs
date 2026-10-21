@@ -495,22 +495,9 @@
       (cons '("\\.m$" . octave-mode) auto-mode-alist))
 
 
-;; better visulization for parentheses
+;; better visulization for parentheses (prog-mode only; LaTeX-mode is a text mode)
 (use-package! rainbow-delimiters
-  :defer
-  :diminish
-  ;; :init
-  ;; (setq-default rainbow-delimiters-mode)
-  ;; (setq-default electric-pair-mode)
-  :hook
-  ((prog-mode . rainbow-delimiters-mode)
-   ;; (prog-mode . electric-pair-mode)
-   (prog-mode . smartparens-mode)
-   )
-  :config
-  (add-hook 'latex-mode-hook 'rainbow-delimiters-mode-disable)
-         ;; (sh-mode . rainbow-delimiters-mode)
-        )
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 ;; General keybindings
 ;;; aliases for two unbound transpose commands
@@ -763,7 +750,7 @@
   ;; This should not be activated in Org mode though
   :after org
   :diminish
-  :init
+  :config
   (setq hl-todo-highlight-punctuation ":"
       hl-todo-keyword-faces
           `(("TODO"       warning bold)
@@ -1008,10 +995,11 @@ Allows wrapping quotes, too."
     (map!
    "M-K" #'sp-kill-sexp
    "M-D" #'sp-unwrap-sexp
-   "M-F" #'sp-forward-sexp
    "C-c s b" #'sp-forward-barf-sexp
    "C-c s C-b" #'sp-backward-barf-sexp
    "C-c s s" #'sp-forward-slurp-sexp
+   "C-c s f" #'sp-forward-sexp
+   "C-c s C-f" #'sp-backward-sexp
    "C-c s C-s" #'sp-backward-slurp-sexp
    "C-c s k" #'sp-kill-sexp
    "C-c s d" #'sp-unwrap-sexp
@@ -1023,7 +1011,8 @@ Allows wrapping quotes, too."
    "C-c s {" #'sp-wrap-curly
    "C-c s c" #'sp-wrap-curly
    "C-c s +" #'sp-wrap-square
-   "C-c s ü" #'sp-wrap-square
+   "C-c s [" #'sp-wrap-square
+   "C-c s ]" #'sp-wrap-square
    "C-c s a" #'sp-wrap-square
   ))
 
@@ -1543,11 +1532,15 @@ except for programming modes (see `variable-pitch-mode')."
 ;; ====================
 ;; PYTHON
 ;; ====================
+(use-package! python
+  :ensure t
 
+  :config
+                                        ; Treat '_' as a punctuation mark
+  (add-hook! 'python-mode-hook (modify-syntax-entry ?_ "."))
 
-
-; Treat '_' as a word delimiter.
-(add-hook! 'python-mode-hook (modify-syntax-entry ?_ "w"))
+  ;; (py-underscore-word-syntax-p-off)
+  )
 ;; ;; Alternative to LSP-mode: elpy
 ;; set local key: C-c g to +lookup/definition
 ;; (use-package! elpy
@@ -1555,13 +1548,21 @@ except for programming modes (see `variable-pitch-mode')."
 ;;   :init
 ;;   (advice-add 'python-mode :before 'elpy-enable))
 
-(map! :map python-mode-map
+(map! :map prog-mode-map
       "C-c g"    #'+lookup/definition
-      ;; "<C-up>"   #'move-line-up
       "<M-up>"   #'move-line-up
-      ;; "<C-down>" #'move-line-down
       "<M-down>" #'move-line-down
+      "C-c d"    #'+lookup/documentation
       )
+
+(map! :map python-mode-map
+      ;; "<C-up>"   #'move-line-up
+      ;; "<C-down>" #'move-line-down
+      "C-c <left>" #'python-indent-shift-left
+      "C-c <right>" #'python-indent-shift-right
+      )
+
+;; Add a shortcut to run code formatter on region, see emacs-python-black
 
 
 ;; ====================
