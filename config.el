@@ -62,6 +62,9 @@
                              (select-frame-set-input-focus frame))))))
 (add-hook 'server-after-make-frame-hook #'my/server-focus-frame-h 90)
 
+;; persp-mode session restore: drop unreadable buffer-local variables
+(load! "~/.doom.d/defuns/persp-session-fix.el")
+
 ;; Multiboot: OS-specific Setups
 ;; Might be good to change at some point into loading different files per hardware config.
 ;; e.g.:
