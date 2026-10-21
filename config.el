@@ -406,12 +406,13 @@
 (set-window-buffer nil (current-buffer))
 (setq-default flyspell-default-dictionary "en_GB-ize-w_accents")
 ;;-ize endings with British English as default dictionary.
-(setq-default ispell-dictionary "en_GB-ize-w_accents")
+;; (setq-default ispell-dictionary "en_GB-ize-w_accents")
+(setq-default ispell-dictionary "en_GB-ize")
 (setq-default ispell-personal-dictionary (concat conf-directory ".aspell.en.pws")) ; custom dictionary
-(after! writegood ; don't highlight passive voice
-(writegood-passive-voice-turn-off))
-(setq reftex-default-bibliography '(concat org-directory "full_zotbib.bib"))
-(setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
+;; (after! writegood ; don't highlight passive voice
+;; (writegood-passive-voice-turn-off)
+;; (writegood-weasels-turn-off)
+;; )
 ;; (if (eq initial-window-system 'x)       ; Start in fullscreen; but seems buggy in macos
 ;;     (toggle-frame-maximized)
 ;;   (toggle-frame-fullscreen))
@@ -823,11 +824,14 @@
 ;; Update PDF buffers after successful LaTeX runs
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
+  ;; more sensible names for synctex commands
+  ;; (defalias 'pdf-sync-forward-search 'my/synctex-jump-to-pdf )
+  ;; (defalias 'pdf-sync-backward-search 'my/synctex-jump-to-source-from-pdf )
 (add-hook! 'LaTeX-mode-hook #'visual-line-mode)
+  (add-hook! 'LaTeX-mode-hook #'flyspell-mode)
 (add-hook! 'LaTeX-mode-hook #'turn-off-auto-fill)
 (add-hook! 'TeX-update-style-hook 'hl-todo-mode)
 (setq TeX-save-query nil)
-(setq reftex-cite-prompt-optional-args t)
 (map!
  :map LaTeX-mode-map
  "C-c C-f" #'TeX-font)
@@ -839,7 +843,8 @@
 (load "~/.doom.d/defuns/latex-snippets.el")
 ;; Scroll-other-window fix for pdftools
 (load "~/.doom.d/defuns/scroll-other-window.el")
-(sow-mode)
+
+
 
 (defun my/TeX-delete-char ()
 "Delete TeX-quotes at once if encountered."
@@ -875,6 +880,9 @@
 (after! reftex
   (setq reftex-toc-split-windows-fraction 0.2)
   (setq reftex-toc-split-windows-horizontally t)
+  (setq reftex-cite-prompt-optional-args t)
+  (setq reftex-default-bibliography (list (concat org-directory "full_zotbib_mac.bib")))
+  (setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
   (setq reftex-auto-recenter-toc 'frame)
   (setq reftex-idle-time 0.5) ; default 1.2
   ;; (setq reftex-toc-auto-recenter-timer ) ; find a better setting for this variable
