@@ -151,7 +151,8 @@
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-       (org +roam +journal +jupyter +pandoc) ; interesting flags to add:pomodoro, pandoc, noter,
+       ;; no +roam: Doom now maps it to org-roam v2; v1 is set up in packages.el and defuns/org-roam-v1.el
+       (org +journal +jupyter +pandoc) ; interesting flags to add:pomodoro, pandoc, noter,
                                         ; organize your plain life in plain text
        ;;perl              ; write code no one else can comprehend
        ;;php               ; perl's insecure younger brother

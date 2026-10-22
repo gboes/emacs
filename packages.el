@@ -51,11 +51,20 @@
 
 ;; for upgrade to Org-Roam V2
 ;; (unpin! org-roam company-org-roam)
+;; Stay on org-roam v1 (file links). Doom's +roam flag now means v2, so it is
+;; off in init.el; the v1 glue is in defuns/org-roam-v1.el.
+(package! org-roam
+  :recipe (:host github :repo "org-roam/org-roam-v1")
+  :pin "946a879a4a18756a0508afba1e0b0fe070c6a8b4")
+;; v1 talks to sqlite via emacsql-sqlite3, which needs `emacsql-process';
+;; emacsql removed it after 4.2.0.
+(package! emacsql :pin "f111b0acc79eadeeb3c6c1332d943f11fd6932ff")
 
 ;; (package! pdf-tools)
 (package! maxframe)
 (package! visual-fill-column)
 (package! beacon) ; blink cursor when scrolling
+(package! rainbow-delimiters) ; no longer declared by any Doom module
 (package! org-ref)
 (package! ivy-bibtex)
 (package! citar)

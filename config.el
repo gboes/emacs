@@ -491,7 +491,6 @@
 ;;;;;; Mode-Hooks
 
 
-(add-hook! 'text-mode-hook #'hl-todo-mode)
 (add-hook! 'text-mode-hook #'beacon-mode)
 (setq beacon-blink-delay 0.2)
 (setq beacon-blink-duration 0.2)
@@ -776,11 +775,14 @@
    ))
 
 (use-package! hl-todo
-  ;; This should not be activated in Org mode though
+  ;; Enabled by Doom's `global-hl-todo-mode', which skips Org
   :after org
   :diminish
   :config
   (setq hl-todo-highlight-punctuation ":"
+        ;; Doom sets this to nil (comments only); highlight LaTeX prose too.
+        ;; Org is excluded via `hl-todo-exclude-modes'.
+        hl-todo-text-modes '(TeX-mode)
         hl-todo-keyword-faces
         `(("TODO"       warning bold)
           ("CRITICAL"       error bold)
@@ -916,7 +918,6 @@
   (setq reftex-auto-recenter-toc 'frame)
   (setq reftex-idle-time 0.5) ; default 1.2
   ;; (setq reftex-toc-auto-recenter-timer ) ; find a better setting for this variable
-  (add-hook! 'text-mode-hook #'hl-todo-mode)
   (add-hook! 'reftex-toc-mode-hook #'org-indent-mode #'visual-line-mode)
   )
 
@@ -1196,6 +1197,8 @@ Allows wrapping quotes, too."
           (67 . (:foreground "lightblue"))
           (68 . success)
           (69 . white)))
+  ;; TODO in bold orange, like priority [#B]
+  (add-to-list 'org-todo-keyword-faces '("TODO" :inherit (bold warning org-todo)))
   ;; (setq org-tag-alist nil)
   (setq org-journal-tag-alist '(("PhD_writing" . ?w) ("PhD_reading" . ?r)
                                 ("exploration" . ?e) ("procrastination" . ?P)
@@ -1221,6 +1224,8 @@ Allows wrapping quotes, too."
   (defalias 'my/org-toc  'counsel-org-goto))
 
 ;;;; org-roam
+
+(load! "~/.doom.d/defuns/org-roam-v1.el")
 
 (use-package! org-bullets
   :after org
@@ -1349,8 +1354,6 @@ Allows wrapping quotes, too."
   ;;  "%?"
   ;;  :unnarrowed t)
   ;; ))
-  ;; (setq org-roam-database-connector 'sqlite3)
-  (setq org-roam-database-connector 'sqlite-builtin)
   (setq +org-roam-open-buffer-on-find-file nil) ; inhibit roam buffer
   (setq org-roam-db-update-method 'immediate) ; seems to work better on windows bc of problems with async processes
   ;; (setq org-roam-db-update-idle-seconds  30) ; fewer db-updates
