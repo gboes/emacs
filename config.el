@@ -1596,7 +1596,14 @@ except for programming modes (see `variable-pitch-mode')."
 ;; ====================
 ;; CSV mode
 ;; ====================
-(add-hook! 'csv-mode-hook (csv-align-mode))
+(defun my/csv-setup-h ()
+  "Align columns; disable text-mode settings that break alignment."
+  (mixed-pitch-mode -1)
+  (+word-wrap-mode -1)
+  (visual-line-mode -1)
+  (setq-local truncate-lines t)
+  (csv-align-mode +1))
+(add-hook! 'csv-mode-hook #'my/csv-setup-h)
 ;; ====================
 ;; PYTHON
 ;; ====================

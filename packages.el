@@ -75,8 +75,6 @@
 (package! org-download)
 (package! edit-server)
 (package! exwm)
-(package! csv)
-(package! csv-mode)
 (package! ox-pandoc) ; enable pandoc powered eports for org files
 (package! lsp-grammarly) ; correcting grammar in normal buffers!
 (package! latex-extra)
