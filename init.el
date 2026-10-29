@@ -181,6 +181,7 @@
        ;;(wanderlust +gmail)
 
        :app
+       everywhere          ; tecosaur's emacs-everywhere addition
        ;;calendar
        ;;irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
