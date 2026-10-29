@@ -78,7 +78,6 @@
 ;; refer to separate files for OS-dependent settings (e.g. modifier keys,
 ;; themes), and make everything below OS-agnostic. (which might be tricky for key bindings.)
 
-
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
        (setq doom-font (font-spec :family "monospace" :size 15 ))
@@ -124,7 +123,35 @@
         ;; ns-control-modifier 'super
         ;; ns-function-modifier 'hyper
         ns-command-modifier 'meta
-        ns-option-modifier 'super)
+        ns-option-modifier 'super
+        ;; Caps Lock: Karabiner sends right Control in Emacs, except for the
+        ;; Option-layer keys (dead keys, ß, œ, ¿, « » ...), which it sends as
+        ;; right Option. See ~/gdrive/conf/karabiner/karabiner.json.
+        ns-right-control-modifier 'hyper
+        ns-right-option-modifier 'none) ; macOS composes dead keys
+       ;; Caps+key in Emacs mirrors Option+key elsewhere in macOS
+       (map! "H-<backspace>" #'backward-kill-word
+             "H-<delete>"    #'kill-word
+             "H-<left>"      #'backward-word
+             "H-<right>"     #'forward-word
+             "H-<up>"        #'backward-paragraph
+             "H-<down>"      #'forward-paragraph
+             "H-v"           #'+vterm/here)
+       ;; In vterm the shell owns the cursor: send the readline word keys
+       ;; (as M-b etc. do) instead of moving Emacs point. Copy mode keeps the
+       ;; Emacs commands, since there the buffer is navigated directly.
+       (defun my/vterm-send-M-b () (interactive) (vterm-send-key "b" nil t))
+       (defun my/vterm-send-M-f () (interactive) (vterm-send-key "f" nil t))
+       (defun my/vterm-send-M-d () (interactive) (vterm-send-key "d" nil t))
+       (after! vterm
+         (map! :map vterm-mode-map
+               "H-<backspace>" #'vterm-send-meta-backspace
+               "H-<delete>"    #'my/vterm-send-M-d
+               "H-<left>"      #'my/vterm-send-M-b
+               "H-<right>"     #'my/vterm-send-M-f
+               :map vterm-copy-mode-map
+               "H-<left>"      #'backward-word
+               "H-<right>"     #'forward-word))
        (if (version<= emacs-version "28")
            (progn
              (setq ns-use-native-fullscreen nil)
